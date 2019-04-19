@@ -1,0 +1,278 @@
+<% if(!user){ %>
+    <script>window.location.href = "/";</script>
+<% } else if(user.accessLevel != "administrator"){ %>
+    <script>window.location.href = "/";</script>
+<% }%>
+
+<% include ../partials/header %>
+
+<div class="wrapper">
+
+    <% include ../partials/sidebar %>
+
+    <div class="main-panel">
+        <% include ../partials/navbar %>
+
+
+        <div class="content">
+            
+            <div class="container-fluid">     
+                <div class="row">
+                    <div class="col-lg-12">
+
+                        <div class="card mb-3 d-print-none">
+                            <div class="card-header">
+                                <h2 class="title">
+                                    <i class="pe-7s-study"></i>
+                                    Search Patron
+                                </h2>
+                            </div>
+
+                            <div class="card-body">
+                                
+                                <div class="row">
+                                    <div class="col-lg-12 text-center">
+                                        <label for="barcode">Scan/Enter Patron Barcode</label>
+                                        <div class="form-inline">
+                                            <input type="text" class="form-control" placeholder="Patron Barcode" name="search-barcode" id="search-barcode" value="">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-8 col-md-offset-2">
+                                        <div class="card card-user mt-5" id="search-results" style="display:none;">
+                                            <div class="image">
+                                                <img src="./images/avatar-cover.svg" alt="...">
+                                            </div>
+                                            <div class="content">
+
+                                                <div class="author">
+                                                    <img class="avatar border-gray" src="./images/logo.png" alt="..." id="avatar-image">
+            
+                                                    <h4 class="title" id="full-name"></h4>
+                                                </div>
+
+                                                <div class="row">
+
+                                                    <!-- BASIC -->
+                                                    <div class="col-md-6">
+                                                        <ul class="list-group mt-3">
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center text-center">
+                                                                <h6>
+                                                                    BASIC
+                                                                </h6>
+                                                            </li>
+        
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <span class="badge badge-primary badge-pill">Status</span>
+                                                                <span id="status"></span>
+                                                            </li>
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <span class="badge badge-primary badge-pill">Barcode</span>
+                                                                <span id="barcode"></span>
+                                                            </li>
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <span class="badge badge-primary badge-pill">Course</span>
+                                                                <span id="course"></span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- LIBRARY -->
+                                                    <div class="col-md-6">
+                                                        <ul class="list-group mt-3">
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center text-center">
+                                                                <h6>
+                                                                    LIBRARY
+                                                                </h6>
+                                                            </li>
+        
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <span class="badge badge-primary badge-pill">Access Level</span>
+                                                                <span id="access-level"></span>
+                                                            </li>
+        
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        Asset Items
+                                                            
+                                                                        <ul class="list-group list-group-flush">
+                                                                            <li class="list-group-item">
+                                                                                <span class="badge badge-primary badge-pill" id="asset-items-out"></span>
+                                                                                Out
+                                                                            </li>
+                                                                            <li class="list-group-item">
+                                                                                <span class="badge badge-primary badge-pill" id="asset-items-overdue"></span>
+                                                                                Overdue
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+
+                                                                    <div class="col-md-6">
+                                                                        Textbook Items
+                                                            
+                                                                        <ul class="list-group list-group-flush">
+                                                                            <li class="list-group-item">
+                                                                                <span class="badge badge-primary badge-pill" id="textbook-items-out"></span>
+                                                                                Out
+                                                                            </li>
+                                                                            <li class="list-group-item">
+                                                                                <span class="badge badge-primary badge-pill" id="textbook-items-overdue"></span>
+                                                                                Overdue
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>                                                                
+                                                            </li>
+        
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        Library Items
+                                                            
+                                                                        <ul class="list-group list-group-flush">
+                                                                            <li class="list-group-item">
+                                                                                <span class="badge badge-primary badge-pill" id="library-items-out"></span>
+                                                                                Out
+                                                                            </li>
+                                                                            <li class="list-group-item">
+                                                                                <span class="badge badge-primary badge-pill" id="library-items-overdue"></span>
+                                                                                Overdue
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+
+                                                                    <div class="col-md-6">
+                                                                        Media Items
+                                                            
+                                                                        <ul class="list-group list-group-flush">
+                                                                            <li class="list-group-item">
+                                                                                <span class="badge badge-primary badge-pill" id="media-items-out"></span>
+                                                                                Out
+                                                                            </li>
+                                                                            <li class="list-group-item">
+                                                                                <span class="badge badge-primary badge-pill" id="media-items-overdue"></span>
+                                                                                Overdue
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>                                                                
+                                                            </li>
+        
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <ul class="list-group list-group-flush">
+                                                                                <li class="list-group-item">
+                                                                                    <span class="badge badge-primary badge-pill" id="library-holds"></span>
+                                                                                    Library Holds
+                                                                                </li>
+                                                                                <li class="list-group-item">
+                                                                                    <span class="badge badge-primary badge-pill" id="media-bookings"></span>
+                                                                                    Media Bookings
+                                                                                </li>
+                                                                            </ul>
+                                                                        </div>
+    
+                                                                        <div class="col-md-6">
+                                                                            Fines
+                                                                
+                                                                            <ul class="list-group list-group-flush">
+                                                                                <li class="list-group-item">
+                                                                                    <span class="badge badge-primary badge-pill" id="fines-library"></span>
+                                                                                    Library
+                                                                                </li>
+                                                                                <li class="list-group-item">
+                                                                                    <span class="badge badge-primary badge-pill" id="fines-textbook"></span>
+                                                                                    Textbook
+                                                                                </li>                                                                                
+                                                                                <li class="list-group-item">
+                                                                                    <span class="badge badge-primary badge-pill" id="fines-other"></span>
+                                                                                    Other
+                                                                                </li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>                                                                
+                                                                </li>
+                                                            
+                                                        </ul>
+                                                    </div>
+
+                                                </div>    
+                                                
+                                                <div class="row">
+
+                                                    <!-- ATTENDANCE -->
+                                                    <div class="col-lg-12">
+
+                                                        <div class="card">
+
+                                                            <div class="card-header">
+                                                                <h2>Attendance</h2>
+                                                            </div>
+
+                                                            <div class="card-body">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-bordered" id="tblAttendance" width="100%" cellspacing="0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Date</th>
+                                                                                <th>Time In</th>
+                                                                                <th>Time Out</th>
+                                                                                <th>Section</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tfoot>
+                                                                            <tr>
+                                                                                <th>Date</th>
+                                                                                <th>Time In</th>
+                                                                                <th>Time Out</th>
+                                                                                <th>Section</th>
+                                                                            </tr>
+                                                                        </tfoot>                                
+                                                                        <tbody>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>                    
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>                                    
+
+                                </div>
+
+                            </div>
+
+                            <div class="card-footer">
+                                <h5 class="stats">
+                                    Updated at <span class="last-updated text-info"></span>
+                                </h5>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                                
+            </div>
+
+        </div>
+
+        <% include ../partials/panel-footer %>
+    </div>
+</div>
+
+
+
+<% include ../partials/footer %>
+
+<script src="./js/patron.js"></script>

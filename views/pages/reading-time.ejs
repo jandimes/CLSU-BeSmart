@@ -1,0 +1,80 @@
+<% if(!user){ %>
+    <script>window.location.href = "/";</script>
+<% } else if(user.accessLevel != "administrator"){ %>
+    <script>window.location.href = "/";</script>
+<% }%>
+
+<% include ../partials/header %>
+
+<div class="wrapper">
+
+    <% include ../partials/sidebar %>
+
+    <div class="main-panel">
+        <% include ../partials/navbar %>
+
+
+        <div class="content">
+            
+            <div class="container-fluid">
+                
+                <!-- Charts -->
+                <div class="row">
+
+                    <div class="col-md-6 col-md-offset-3">
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h3 class="title">Reading Time per Course</h3>
+                            </div>
+    
+                            <div class="card-body">
+                                <div class="container-fluid mb-3">
+                                    <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                        <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                        </div>
+                                        <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                        </div>
+                                    </div>
+                                    <canvas id="chart-reading-time-course" width="487" height="487" class="chartjs-render-monitor" style="display: block; width: 487px; height: 487px;"></canvas>
+                                </div>
+
+                                <div class="jumbotron chart-text-summary" id="text-reading-time-course">
+                                    <p class="text-summary">
+                                        Library Reading Time has
+                                            a <i class="text-warning">total</i> of <b class="text-info text-total"></b> hours and
+                                            an <i class="text-warning">average</i> of <b class="text-info text-average"></b> hours
+                                        per <i class="text-reading-time"></i>.
+                                    </p>
+                                    <p class="text-data"></p>
+                                </div>
+                            </div>
+    
+                            <div class="card-footer text-muted">
+                                <button id="print-chart-reading-time-course" type="button" class="btn btn-primary toggle-print-chart">Print Chart</button>
+                                <button id="show-text-reading-time-course" type="button" class="btn btn-primary toggle-text-summary" onclick="toggleTextSummary(this, 'course')">Show Summary</button>
+                                <h5 class="stats">
+                                    Updated at <span class="last-updated text-info"></span>
+                                </h5>
+                            </div>
+                        </div>
+
+                    </div>                    
+
+                </div>                            
+                                
+            </div>
+
+        </div>
+
+        <% include ../partials/panel-footer %>
+    </div>
+</div>
+
+
+
+<% include ../partials/footer %>
+
+<script src="./js/reading-time.js"></script>

@@ -1,0 +1,44 @@
+2018-11-30T16:49:43.972Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM tbl_user SET isActive=false WHERE id = '14'' at line 1
+2018-12-01T04:03:25.711Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '*) as totalAttendance FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_pa' at line 1
+2018-12-01T04:13:54.833Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SELCT substr(date, 1, 4) AS year, COUNT(*) AS totalAttendance FROM tbl_attendanc' at line 1
+2018-12-01T04:20:09.932Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SELCT
+                        substr(date, 6, 2) AS month,
+                     ' at line 1
+2018-12-01T04:20:43.130Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SELCT
+                        substr(date, 6, 2) AS month,
+                     ' at line 1
+2018-12-01T04:20:54.548Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SELCT
+                        substr(date, 6, 2) AS month,
+                     ' at line 1
+2018-12-01T09:29:30.766Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SEECT tbl_user_settings.* FROM tbl_user INNER JOIN tbl_user_settings ON tbl_user' at line 1
+2018-12-06T09:01:00.089Z error: [object Object]
+2018-12-14T15:21:27.513Z error: Unknown column 'undefined' in 'where clause'
+2018-12-14T15:21:44.074Z error: Unknown column 'undefined' in 'where clause'
+2018-12-15T13:48:33.739Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SELEC tbl_patrons_basic.barcode, date, timeIn, timeOut, course, section, gender ' at line 1
+2018-12-15T13:49:31.792Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SELEC tbl_patrons_basic.barcode, date, timeIn, timeOut, course, section, gender ' at line 1
+2019-04-19T05:06:56.650Z error: i.date.split is not a function
+2019-04-19T05:10:07.526Z error: i.date.split is not a function
+2019-04-19T05:12:01.645Z error: i.date.split is not a function
+2019-04-19T05:12:35.620Z error: i.date.get is not a function
+2019-04-19T05:40:37.607Z error: Unknown column 'undefined' in 'where clause'
+2019-04-19T05:41:15.051Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'GROUP BY year, month ASC' at line 5
+2019-04-19T06:23:52.819Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'ORDER BY
+                                tbl_attendance.date ASC,
+              ' at line 8
+2019-04-19T07:30:49.273Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'SELEC
+                                tbl_attendance.*,
+                        ' at line 1
+2019-04-19T14:17:17.443Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '?, ?, ?, ? )' at line 1
+2019-04-19T14:18:06.546Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '?, ?, ?, ? )' at line 1
+2019-04-19T14:18:37.156Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '?, ?, ?, ? )' at line 1
+2019-04-19T14:18:47.176Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '?, ?, ?, ? )' at line 1
+2019-04-19T14:20:05.950Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '"barcode", "date", "timeIn", "timeOut", "section")
+                            V' at line 1
+2019-04-19T14:20:48.682Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '"barcode", "date", "timeIn", "timeOut", "section")
+                             ' at line 1
+2019-04-19T14:21:03.337Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '"barcode", "date", "timeIn", "timeOut", "section")
+                            V' at line 1
+2019-04-19T14:22:28.537Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '"barcode", "date", "timeIn", "timeOut", "section")
+                            V' at line 1
+2019-04-19T14:23:08.955Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '"barcode", "date", "timeIn", "timeOut", "section")
+                            V' at line 1

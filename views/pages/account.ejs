@@ -1,0 +1,73 @@
+<% if(!user){ %>
+        <script>window.location.href = "/";</script>
+<% } else if(user.accessLevel != "administrator"){ %>
+    <script>window.location.href = "/";</script>
+<% }%>
+
+
+
+<% include ../partials/header %>
+
+<div class="wrapper">
+
+    <% include ../partials/sidebar %>
+
+    <div class="main-panel">
+        <% include ../partials/navbar %>
+
+
+        <div class="content">
+            
+            <div class="container-fluid">                
+                
+                <div class="card mb-3 d-print-none">
+                    <div class="card-header">
+                      <i class="fas fa-table"></i>
+                      Patron
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="tblUsers" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Access Level</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Access Level</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </tfoot>                                
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-muted">
+                        <h5 class="stats">
+                            Updated at <span class="last-updated text-info"></span>
+                        </h5>
+                    </div>
+                </div>
+                                
+            </div>
+
+        </div>
+
+        <% include ../partials/panel-footer %>
+    </div>
+</div>
+
+
+
+<% include ../partials/footer %>
+
+<script src="./js/account.js"></script>

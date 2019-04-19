@@ -1,0 +1,20 @@
+<% include ../partials/header %>
+    <div class="panel">
+        <div class="panel-heading bg-danger text-danger">
+            <h1><%= message %></h1>
+            <h2>Status <%= error.status %></h2>            
+        </div>
+        <div class="panel-body">
+            <pre><%= error.stack %></pre>
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-danger" id="btnHome">Go back to home page</button>
+        </div>
+    </div>
+
+    <script>
+        $(`button#btnHome`).on( `click`, () => {
+            window.location.href = `/`;
+        } );
+    </script>
+<% include ../partials/footer %>

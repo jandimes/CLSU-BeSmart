@@ -1,0 +1,393 @@
+<% include ../partials/header %>
+
+<% if(!user){ %>
+    <script>window.location.href = "/";</script>
+<% } else if(user.accessLevel != "administrator"){ %>
+    <script>window.location.href = "/";</script>
+<% } else { %>
+    <script>
+        $.notify( {
+            icon: 'pe-7s-smile',
+            message: `Welcome, <%= user.username %>!`
+        }, {
+            type: 'success',
+            timer: 4000
+        } );
+    </script>
+<% } %>
+
+<div class="wrapper">
+
+    <% include ../partials/sidebar %>
+
+    <div class="main-panel">
+        <% include ../partials/navbar %>
+
+
+        <div class="container mt-5" id="progress-bar-container">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="progress progress-striped active progress-sm">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                            <span class="sr-only">0% Complete</span>
+                        </div>
+                    </div>
+                </div>    
+            </div>            
+        </div>
+
+        <div class="content">
+            
+            <div class="container-fluid">                
+                
+                <div class="row d-print-none">
+                    <div class="col-lg-12">
+                        
+                        <div class="card">
+
+                            <div class="card-header ">
+                                <h2 class="title">
+                                    <i class="pe-7s-id"></i>
+                                    Patron Attendance
+                                </h2>                                
+                            </div>
+
+                            <div class="card-body bg-warning">
+                                
+                                <form name="frmAttendance" onsubmit="return false;">
+                                    <div class="row">
+                                        <div class="col-sm-4 col-sm-offset-4">
+                                            <label for="barcode">Scan/Enter Patron Barcode</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" placeholder="Patron Barcode" name="barcode" value="">
+                                                <span class="input-group-addon text-muted">-</span>
+                                                <select class="form-control" name="section"></select>
+                                                <input type="hidden" name="isValid" value="false">
+                                            </div>
+                                        </div>                                
+                                    </div>
+                                </form>                                
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div> 
+
+                <!-- DAILY ATTENDANCE -->
+                <div class="row d-print-none">
+
+                    <div class="col-md-8 col-md-offset-2">
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h1 class="title">
+                                    <i class="pe-7s-date"></i>
+                                    Attendance for Today (<span id="table-attendance-daily-date"></span>)
+                                </h1>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="tblAttendanceDaily" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>Barcode</th>
+                                                <th>Name</th>
+                                                <th>Gender</th>
+                                                <th>Course</th>
+                                                <th>Time In</th>
+                                                <th>Time Out</th>
+                                                <th>Section</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Barcode</th>
+                                                <th>Name</th>
+                                                <th>Gender</th>
+                                                <th>Course</th>
+                                                <th>Time In</th>
+                                                <th>Time Out</th>
+                                                <th>Section</th>
+                                            </tr>
+                                        </tfoot>                                
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer text-muted">
+                                <h5 class="stats">
+                                    Updated at <span class="last-updated text-info"></span>
+                                </h5>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                
+                <!-- Charts -->
+                <div class="row">
+
+                    <div class="col-md-4 col-md-offset-2" id="container-attendance-year">
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h3 class="title">
+                                    <i class="pe-7s-graph"></i>
+                                    Annual Patron Attendance
+                                </h3>
+                            </div>
+    
+                            <div class="card-body">
+                                <div class="container-fluid mb-3">
+                                    <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                        <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                        </div>
+                                        <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                        </div>
+                                    </div>
+                                    <canvas id="chart-attendance-year" width="487" height="487" class="chartjs-render-monitor" style="display: block; width: 487px; height: 487px;"></canvas>
+                                </div>
+
+                                <div class="jumbotron chart-text-summary" id="text-attendance-year">
+                                    <p class="text-summary">
+                                        Library attendance has
+                                            a <i class="text-warning">total</i> of <b class="text-info text-total"></b> and
+                                            an <i class="text-warning">average</i> of <b class="text-info text-average"></b>
+                                        per <i class="text-attendance"></i>.
+                                    </p>
+                                    <p class="text-data"></p>
+                                </div>
+                            </div>
+    
+                            <div class="card-footer text-muted">
+                                <button id="print-chart-attendance-year" type="button" class="btn btn-primary toggle-print-chart">Print Chart</button>
+                                <button id="show-text-attendance-year" type="button" class="btn btn-primary toggle-text-summary" onclick="toggleTextSummary(this, 'year')">Show Summary</button>
+                                <h5 class="stats">
+                                    Updated at <span class="last-updated text-info"></span>
+                                </h5>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="col-md-4" id="container-attendance-month">
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h3 class="title">
+                                    <i class="pe-7s-graph"></i>
+                                    Monthly Patron Attendance for <span class="chart-attendance-month-year"></span>
+                                </h3>
+                                
+                                <select class="form-control input-md d-print-none" name="year" id="chart-attendance-month-year">
+                                    <% for( var x=0; x<5; x++ ) { %>
+                                        <option value="<%= new Date().getFullYear() - x %>"><%= new Date().getFullYear() - x %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+    
+                            <div class="card-body">
+                                <div class="container-fluid mb-3">
+                                    <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                        <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                        </div>
+                                        <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                        </div>
+                                    </div>
+                                    <canvas id="chart-attendance-month" width="487" height="487" class="chartjs-render-monitor" style="display: block; width: 487px; height: 487px;"></canvas>
+                                </div>
+
+                                <div class="jumbotron chart-text-summary" id="text-attendance-month">
+                                    <p class="text-summary">
+                                        Library attendance has
+                                            a <i class="text-warning">total</i> of <b class="text-info text-total"></b> and
+                                            an <i class="text-warning">average</i> of <b class="text-info text-average"></b>
+                                        per <i class="text-attendance"></i>.
+                                    </p>
+                                    <p class="text-data"></p>
+                                </div>
+                            </div>
+    
+                            <div class="card-footer text-muted">
+                                <button id="print-chart-attendance-month" type="button" class="btn btn-primary toggle-print-chart">Print Chart</button>
+                                <button id="show-text-attendance-month" type="button" class="btn btn-primary toggle-text-summary" onclick="toggleTextSummary(this, 'month')">Show Summary</button>
+                                <h5 class="stats">
+                                    Updated at <span class="last-updated text-info"></span>
+                                </h5>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="row">
+
+                    <div class="col-md-8 col-md-offset-2" id="container-attendance-course">
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h3 class="title">
+                                    <i class="pe-7s-graph"></i>
+                                    Patron Attendance per Course
+                                </h3>
+                            </div>
+    
+                            <div class="card-body">
+                                <div class="container-fluid mb-3">
+                                    <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                        <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                        </div>
+                                        <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                        </div>
+                                    </div>
+                                    <canvas id="chart-attendance-course" width="487" height="487" class="chartjs-render-monitor" style="display: block; width: 487px; height: 487px;"></canvas>
+                                </div>
+
+                                <div class="jumbotron chart-text-summary" id="text-attendance-course">
+                                    <p class="text-summary">
+                                        Library attendance has
+                                            a <i class="text-warning">total</i> of <b class="text-info text-total"></b> and
+                                            an <i class="text-warning">average</i> of <b class="text-info text-average"></b>
+                                        per <i class="text-attendance"></i>.
+                                    </p>
+                                    <p class="text-data"></p>
+                                </div>
+                            </div>
+    
+                            <div class="card-footer text-muted">
+                                <button id="print-chart-attendance-course" type="button" class="btn btn-primary toggle-print-chart">Print Chart</button>
+                                <button id="show-text-attendance-course" type="button" class="btn btn-primary toggle-text-summary" onclick="toggleTextSummary(this, 'course')">Show Summary</button>
+                                <h5 class="stats">
+                                    Updated at <span class="last-updated text-info"></span>
+                                </h5>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                </div>
+
+
+
+                <div class="row">                                                            
+
+                    <div class="col-md-4 col-md-offset-2" id="container-attendance-section">
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h3 class="title">
+                                    <i class="pe-7s-graph"></i>
+                                    Patron Attendance per Library Section
+                                </h3>
+                            </div>
+    
+                            <div class="card-body">
+                                <div class="container-fluid mb-3">
+                                    <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                        <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                        </div>
+                                        <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                        </div>
+                                    </div>
+                                    <canvas id="chart-attendance-section" width="487" height="487" class="chartjs-render-monitor" style="display: block; width: 487px; height: 487px;"></canvas>
+                                </div>
+
+                                <div class="jumbotron chart-text-summary" id="text-attendance-section">
+                                    <p class="text-summary">
+                                        Library attendance has
+                                            a <i class="text-warning">total</i> of <b class="text-info text-total"></b> and
+                                            an <i class="text-warning">average</i> of <b class="text-info text-average"></b>
+                                        per <i class="text-attendance"></i>.
+                                    </p>
+                                    <p class="text-data"></p>
+                                </div>
+                            </div>
+    
+                            <div class="card-footer text-muted">
+                                <button id="print-chart-attendance-section" type="button" class="btn btn-primary toggle-print-chart">Print Chart</button>
+                                <button id="show-text-attendance-section" type="button" class="btn btn-primary toggle-text-summary" onclick="toggleTextSummary(this, 'section')">Show Summary</button>
+                                <h5 class="stats">
+                                    Updated at <span class="last-updated text-info"></span>
+                                </h5>
+                            </div>
+                        </div>
+                            
+                    </div>
+
+
+
+                    <div class="col-md-4" id="container-attendance-gender">
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h3 class="title">
+                                    <i class="pe-7s-graph"></i>
+                                    Patron Attendance per Gender
+                                </h3>
+                            </div>
+    
+                            <div class="card-body">
+                                <div class="container-fluid mb-3">
+                                    <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                        <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                        </div>
+                                        <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                            <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                        </div>
+                                    </div>
+                                    <canvas id="chart-attendance-gender" width="487" height="487" class="chartjs-render-monitor" style="display: block; width: 487px; height: 487px;"></canvas>
+                                </div>
+
+                                <div class="jumbotron chart-text-summary" id="text-attendance-gender">
+                                    <p class="text-summary">
+                                        Library attendance has
+                                            a <i class="text-warning">total</i> of <b class="text-info text-total"></b> and
+                                            an <i class="text-warning">average</i> of <b class="text-info text-average"></b>
+                                        per <i class="text-attendance"></i>.
+                                    </p>
+                                    <p class="text-data"></p>
+                                </div>
+                            </div>
+    
+                            <div class="card-footer text-muted">
+                                <button id="print-chart-attendance-gender" type="button" class="btn btn-primary toggle-print-chart">Print Chart</button>
+                                <button id="show-text-attendance-gender" type="button" class="btn btn-primary toggle-text-summary" onclick="toggleTextSummary(this, 'gender')">Show Summary</button>
+                                <h5 class="stats">
+                                    Updated at <span class="last-updated text-info"></span>
+                                </h5>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>                  
+                                
+            </div>
+
+        </div>
+
+
+        <% include ../partials/panel-footer %>
+    </div>
+</div>
+
+<% include ../partials/footer %>
+
+<script src="./js/dashboard.js"></script>
