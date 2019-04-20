@@ -1,9 +1,9 @@
 <% include ../partials/header %>
 
 <% if(!user){ %>
-    <script>window.location.href = "/";</script>
+    <!-- <script>window.location.href = "/";</script> -->
 <% } else if(user.accessLevel != "administrator"){ %>
-    <script>window.location.href = "/";</script>
+    <!-- <script>window.location.href = "/";</script> -->
 <% } else { %>
     <script>
         $.notify( {
@@ -75,7 +75,7 @@
                 </div> 
 
                 <!-- DAILY ATTENDANCE -->
-                <div class="row d-print-none">
+                <div class="row d-print-none">  
 
                     <div class="col-md-8 col-md-offset-2">
 

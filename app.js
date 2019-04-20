@@ -68,6 +68,7 @@ app.use( `/js`, express.static( path.join(__dirname, `node_modules/light-bootstr
 app.use( `/js`, express.static( path.join(__dirname, `public/js`) ) );
 app.use( `/images`, express.static( path.join(__dirname, `public/images`) ) );
 app.use( `/vendor`, express.static( path.join(__dirname, `public/vendor`) ) );
+app.use( `/node_modules`, express.static( path.join(__dirname, `node_modules`) ) );
 
 
 

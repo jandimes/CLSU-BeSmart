@@ -85,7 +85,7 @@ router.get( `/year`, (req, res) => {
             for( var x=0; x<years.length; x++ ){
                 data.push( {
                     year: years[x],
-                    readingTime: readingTimes[x]
+                    totalReadingTime: readingTimes[x]
                 } );
                 totalReadingTime += readingTimes[x];
             }
@@ -94,7 +94,8 @@ router.get( `/year`, (req, res) => {
                 error: false,
                 count: data.length,
                 totalReadingTime: totalReadingTime,
-                data: data
+                data: data,
+                message: `${data.length} result(s) found`
             } );
         }
     );
@@ -188,7 +189,7 @@ router.get( `/month`, (req, res) => {
             for( var x=0; x<months.length; x++ ){
                 data.push( {
                     month: months[x],
-                    readingTime: readingTimes[x]
+                    totalReadingTime: readingTimes[x]
                 } );
                 totalReadingTime += readingTimes[x];
             }
@@ -197,7 +198,8 @@ router.get( `/month`, (req, res) => {
                 error: false,
                 count: data.length,
                 totalReadingTime: totalReadingTime,
-                data: data
+                data: data,
+                message: `${data.length} result(s) found`
             } );
         }
     );
@@ -272,7 +274,7 @@ router.get( `/course`, (req, res) => {
             for( var x=0; x<courses.length; x++ ){
                 data.push( {
                     course: courses[x],
-                    readingTime: readingTimes[x]
+                    totalReadingTime: readingTimes[x]
                 } );
                 totalReadingTime += readingTimes[x];
             }
@@ -281,7 +283,8 @@ router.get( `/course`, (req, res) => {
                 error: false,
                 count: data.length,
                 totalReadingTime: totalReadingTime,
-                data: data
+                data: data,
+                message: `${data.length} result(s) found`
             } );
         }
     );
@@ -359,7 +362,7 @@ router.get( `/section`, (req, res ) => {
             for( var x=0; x<sections.length; x++ ){
                 data.push( {
                     section: sections[x],
-                    readingTime: readingTimes[x]
+                    totalReadingTime: readingTimes[x]
                 } );
                 totalReadingTime += readingTimes[x];
             }
@@ -368,7 +371,8 @@ router.get( `/section`, (req, res ) => {
                 error: false,
                 count: data.length,
                 totalReadingTime: totalReadingTime,
-                data: data
+                data: data,
+                message: `${data.length} result(s) found`
             } );
         }
     );
@@ -446,7 +450,7 @@ router.get( `/gender`, (req, res ) => {
             for( var x=0; x<genders.length; x++ ){
                 data.push( {
                     gender: genders[x],
-                    readingTime: readingTimes[x]
+                    totalReadingTime: readingTimes[x]
                 } );
                 totalReadingTime += readingTimes[x];
             }
@@ -455,7 +459,8 @@ router.get( `/gender`, (req, res ) => {
                 error: false,
                 count: data.length,
                 totalReadingTime: totalReadingTime,
-                data: data
+                data: data,
+                message: `${data.length} result(s) found`
             } );
         }
     );

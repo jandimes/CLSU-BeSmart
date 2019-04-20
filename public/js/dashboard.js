@@ -28,7 +28,7 @@ function onload() {
 
 
   // USER SETTINGS
-  var setUserSettings = () => {
+  const setUserSettings = () => {
     let loggedUser = JSON.parse( localStorage.getItem(`loggedUser`) );
 
     var settings = {
@@ -59,7 +59,7 @@ function onload() {
 
 
 
-  var setSectionSelection = () => {
+  const setSectionSelection = () => {
     var selectEl = $(`select[name="section"]`);
     SECTIONS.forEach( ( section, i ) => {
       var optionEl = document.createElement(`option`);
@@ -73,7 +73,7 @@ function onload() {
 
 
   // DEFAULT SECTION
-  var setDefaultSection = () => {
+  const setDefaultSection = () => {
     let settings = JSON.parse( localStorage.getItem(`settings`) );
     document.forms[`frmAttendance`][`section`].value = settings.section;    
   };
@@ -81,7 +81,7 @@ function onload() {
 
 
   // LAST-UPDATED
-  var setLastUpdated = () => {
+  const setLastUpdated = () => {
     var settings = {
       "async": true,
       "crossDomain": true,
@@ -106,7 +106,7 @@ function onload() {
 
 
   // ATTENDANCE PER DAY
-  var setTableDailyAttendance = () => {
+  const setTableDailyAttendance = () => {
     var settings = {
       "async": true,
       "crossDomain": true,
@@ -148,7 +148,7 @@ function onload() {
 
 
   // TEXT SUMMARY
-  var setTextReadingTimeSummary = ( attendance, data ) => {
+  const setTextAttendanceSummary = ( attendance, data ) => {
     var totalEl = $(`div#text-attendance-${attendance} .text-summary .text-total`);
     var averageEl = $(`div#text-attendance-${attendance} .text-summary .text-average`);
     var attendanceEl = $(`div#text-attendance-${attendance} .text-summary .text-attendance`);
@@ -170,6 +170,8 @@ function onload() {
           value[`${attendance}`] = `Female`;
         else if( value[`${attendance}`] == `M` )
           value[`${attendance}`] = `Male`;
+        else if( value[`${attendance}`] == `U` )
+          value[`${attendance}`] = `Undefined`;
 
       if( index == 0 )
         dataStr += `A `;
@@ -197,7 +199,7 @@ function onload() {
 
 
   // ATTENDANCE PER YEAR
-  var setChartAttendanceYear = () => {
+  const setChartAttendanceYear = () => {
     var settings = {
       "async": true,
       "crossDomain": true,
@@ -211,7 +213,7 @@ function onload() {
   
     $.ajax(settings)
       .done( (response) => {
-        setTextReadingTimeSummary( `year`, response.data );
+        setTextAttendanceSummary( `year`, response.data );
 
         var labels = [], data = [];
         $.each( response.data, (i) => {
@@ -258,7 +260,7 @@ function onload() {
 
 
   // ATTENDANCE PER MONTH
-  var setChartAttendanceMonth = ( year ) => {
+  const setChartAttendanceMonth = ( year ) => {
     var settings = {
       "async": true,
       "crossDomain": true,
@@ -272,7 +274,7 @@ function onload() {
   
     $.ajax(settings)
       .done(function (response) {
-        setTextReadingTimeSummary( `month`, response.data );
+        setTextAttendanceSummary( `month`, response.data );
 
         var labels = [], data = [];
         $.each( response.data, (i) => {     
@@ -324,7 +326,7 @@ function onload() {
 
 
   // ATTENDANCE PER COURSE
-  var setChartAttendanceCourse = () => {
+  const setChartAttendanceCourse = () => {
     var settings = {
       "async": true,
       "crossDomain": true,
@@ -338,7 +340,7 @@ function onload() {
   
     $.ajax(settings)
       .done( (response) => {
-        setTextReadingTimeSummary( `course`, response.data );
+        setTextAttendanceSummary( `course`, response.data );
 
         var labels = [], data = [];
         $.each( response.data, (i) => {
@@ -378,7 +380,7 @@ function onload() {
 
 
   // ATTENDANCE PER LIBRARY SECTION
-  var setChartAttendanceSection = () => {
+  const setChartAttendanceSection = () => {
     var settings = {
       "async": true,
       "crossDomain": true,
@@ -392,7 +394,7 @@ function onload() {
   
     $.ajax(settings)
       .done( (response) => {
-        setTextReadingTimeSummary( `section`, response.data );
+        setTextAttendanceSummary( `section`, response.data );
 
         var labels = SECTIONS, data = [],
             backgroundColors = [`#6B5B95`, `#DD4132`, `#9E1030`, `#FE840E`, `#C62168`, `#E94B3C`];
@@ -426,7 +428,7 @@ function onload() {
 
 
   // ATTENDANCE PER GENDER
-  var setChartAttendanceGender = () => {
+  const setChartAttendanceGender = () => {
     var settings = {
       "async": true,
       "crossDomain": true,
@@ -441,9 +443,9 @@ function onload() {
     $.ajax(settings)
     
       .done( (response) => {
-        setTextReadingTimeSummary( `gender`, response.data );
+        setTextAttendanceSummary( `gender`, response.data );
 
-        var labels = [`Female`, `Male`], data = [], backgroundColors = [`rgb(214,71,153)`, `rgb(0,0,255)`];
+        var labels = [`Female`, `Male`, `Undefined`], data = [], backgroundColors = [`rgb(214,71,153)`, `rgb(0,0,255)`];
         $.each( response.data, (i) => {
           data.push( response.data[i].totalAttendance ); 
         } );
@@ -476,14 +478,14 @@ function onload() {
 
 
   
-  var setFrmAttendanceFocus = () => {
+  const setFrmAttendanceFocus = () => {
     $(`form[name=frmAttendance] input[name=barcode]`).focus();
   };
 
 
 
 // MY FUNCTIONS
-var resetCanvas = ( canvasID ) => {
+const resetCanvas = ( canvasID ) => {
   var canvasContainer = $(`canvas#${canvasID}`).parent(),
       width = $(`canvas#${canvasID}`).width(),
       height = $(`canvas#${canvasID}`).height();
@@ -561,7 +563,7 @@ $(`form[name=frmAttendance] input[name=barcode]`).on( `keyup`, (e) => {
 
 } );
 
-var submitFrmAttendance = () => {
+const submitFrmAttendance = () => {
   var form = document.forms[`frmAttendance`],
       barcode = ( form[`barcode`].value ).trim(),
       section = form[`section`].value,
@@ -626,7 +628,7 @@ var submitFrmAttendance = () => {
 
 
 // MY FUNCTIONS
-var notify = ( message, type ) => {
+const notify = ( message, type ) => {
   var icon = `pe-7s-` + ((type==`success`) ? `smile`:`close-circle`);
 
   var showMsg = ( message ) => {
@@ -648,7 +650,7 @@ var notify = ( message, type ) => {
   }
 };
 
-var showProgessBar = () => {
+const showProgessBar = () => {
   var content = $(`div.main-panel > div.content`);
     content.hide();
 
@@ -656,7 +658,7 @@ var showProgessBar = () => {
     progressBarContainer.show();
 };
 
-var hideProgressBar = () => {
+const hideProgressBar = () => {
   var content = $(`div.main-panel > div.content`);
     content.show();
 
@@ -664,7 +666,7 @@ var hideProgressBar = () => {
     progressBarContainer.hide();
 };
 
-var animateProgressBar = ( value ) => {        
+const animateProgressBar = ( value ) => {        
   var progressBar = document.querySelector(`div#progress-bar-container div.progress-bar`);
   var start = $(progressBar).attr( `aria-valuenow` );
   
@@ -746,21 +748,33 @@ $(`#print-chart-attendance-gender`).click( () => {
 });
 
 const print = (dataUrl, title, textSummary) => {
+  const windowEl = document.createElement(`html`);
     var windowContent = ``;
-      windowContent += `<html>`;
-      windowContent += `<head><style>*{display:none;}@media print{*{display:block;}style{display:none;}}</style></head>`;
+      windowContent += `<head>
+                          <style>*{display:none;}@media print{*{display:block;}style{display:none;}}</style>
+                          <link rel="stylesheet" href="./css/assets/css/bootstrap.min.css">                          
+                        </head>`;
       windowContent += `<body>`;
-      windowContent += `<h1 style="font-size:35px;">BESMART</h1>`;
-      windowContent += `<img src="${dataUrl}" width="75%" height="100%" style="margin-left:75px">`;
-      windowContent += `<h1>${title}</h1>`;
-      windowContent += `<div>${textSummary}</div`;
+      windowContent += `
+        <div class="container-fluid">
+          <div class="row mb-5">
+            <h2 class="text-info text-center" style="font-size:35px;">
+              Barcode-Enabled Solution for Monitoring Attendance and Reading Time (BeSmart)
+            </h2>
+          </div>
+          <div class="row">
+            <img src="${dataUrl}" width="75%" height="100%" style="margin-left:75px">
+          </div>
+          <div class="row">
+            <h4>${title}</h4>
+            <div>${textSummary}</div>
+          </div>
+        </div>
+      `;
       windowContent += `</body>`;
-      windowContent += `</html>`;
-    var printWin = window.open(`width=1366,height=692`);
-    printWin.document.write(windowContent);
-    printWin.focus();
-    printWin.print();
-    printWin.close();
+  windowEl.innerHTML = windowContent;
+
+  $(windowEl).printThis();
 }
 
 
