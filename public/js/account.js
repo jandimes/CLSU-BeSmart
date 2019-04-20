@@ -1,4 +1,7 @@
 const onload = () => {
+    setSectionSelection();
+    setDefaultSection();
+
     setLastUpdated();
   };
   
@@ -24,6 +27,45 @@ const setLastUpdated = () => {
         } );
 };
 
+const setSectionSelection = () => {
+    var selectEl = $(`select[name="section"]`);
+    SECTIONS.forEach( ( section, i ) => {
+      var optionEl = document.createElement(`option`);
+        optionEl.value = (i + 1);
+        optionEl.innerHTML = section;
+
+      selectEl.append( optionEl );
+    } );
+  }
+
+
+
+  // DEFAULT SECTION
+  const setDefaultSection = () => {
+    let userID = JSON.parse( localStorage.getItem(`settings`) ).userID;
+
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": `/user-settings?userID=${userID}`,
+        "method": "GET",
+        "headers": {
+          "cache-control": "no-cache",
+          "Postman-Token": "a21b3e1d-1f8b-41c7-8095-1bf003ea25fd"
+        }
+      }
+      
+      $.ajax(settings)      
+        .done( (response) => {  
+            document.forms[`frmUserSettings`][`section`].value = response.data.section;    
+        })
+        .fail( (response) => {
+            let responseObj = response.responseJSON;
+            if( responseObj.error )
+                notify( responseObj.data, `danger` );
+        } );    
+  };
+
 
 
 onload();
@@ -31,7 +73,7 @@ onload();
 
 
 // GET USER DATA
-var getUsersData = () => {
+const getUsersData = () => {
     var settings = {
         "async": true,
         "crossDomain": true,
@@ -64,6 +106,28 @@ var getUsersData = () => {
 
 
 // MY FUNCTIONS
+const notify = ( message, type ) => {
+  var icon = `pe-7s-` + ((type==`success`) ? `smile`:`close-circle`);
+
+  var showMsg = ( message ) => {
+      $.notify( {
+          icon: icon,
+          message: message
+      }, {
+          type: type,
+          timer: 1000
+      } );
+  }
+
+  if( typeof message == `object` ) {
+      (message).forEach( error => {
+          showMsg( error.msg );
+      });
+  } else {
+      showMsg( message );
+  }
+};
+
 function promoteUser(id){
     swal({
         title: "Are you sure you want to promote this user?",
@@ -151,6 +215,37 @@ function deactivateUser(id){
         }
     });
 }
+
+// EVENT LISTENERS
+$(`form[name="frmUserSettings"] select[name="section"]`).on( `change`, (e) => {
+    var userID = JSON.parse( localStorage.getItem(`settings`) ).userID;
+    
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "/user-settings/section",
+        "method": "PUT",
+        "headers": {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "cache-control": "no-cache",
+            "Postman-Token": "6c0b64c7-f6c1-4bef-b737-dbdde059f034"
+        },
+        "data": {
+            "userID": userID,
+            "section": e.currentTarget.value
+        }
+    }
+
+    $.ajax(settings)      
+        .done( (response) => {  
+            notify( response.data, `success` );
+        })
+        .fail( (response) => {
+            let responseObj = response.responseJSON;
+            if( responseObj.error )
+                notify( responseObj.data, `danger` );
+        } );
+} );
 
 
 

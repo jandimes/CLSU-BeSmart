@@ -34,18 +34,16 @@ function onload() {
     var settings = {
       "async": true,
       "crossDomain": true,
-      "url": `/users/${loggedUser.ID}/settings`,
+      "url": `/user-settings?userID=${loggedUser.ID}`,
       "method": "GET",
       "headers": {
-        "Content-Type": "application/x-www-form-urlencoded",
         "cache-control": "no-cache",
-        "Postman-Token": "9db2a196-bcc1-43ff-8261-a0bff5d91442"
-      },
-      "data": ""
+        "Postman-Token": "a21b3e1d-1f8b-41c7-8095-1bf003ea25fd"
+      }
     }
     
-    $.ajax(settings)
-      .done( (response) => {
+    $.ajax(settings)      
+      .done( (response) => {  
         let settings = response.data;
         localStorage.setItem( `settings`, JSON.stringify(settings) );
         setDefaultSection();
@@ -74,8 +72,28 @@ function onload() {
 
   // DEFAULT SECTION
   const setDefaultSection = () => {
-    let settings = JSON.parse( localStorage.getItem(`settings`) );
-    document.forms[`frmAttendance`][`section`].value = settings.section;    
+    let userID = JSON.parse( localStorage.getItem(`settings`) ).userID;
+
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": `/user-settings?userID=${userID}`,
+        "method": "GET",
+        "headers": {
+          "cache-control": "no-cache",
+          "Postman-Token": "a21b3e1d-1f8b-41c7-8095-1bf003ea25fd"
+        }
+      }
+      
+      $.ajax(settings)      
+        .done( (response) => {  
+          document.forms[`frmAttendance`][`section`].value = response.data.section;                
+        })
+        .fail( (response) => {
+            let responseObj = response.responseJSON;
+            if( responseObj.error )
+                notify( responseObj.data, `danger` );
+        } );    
   };
 
 

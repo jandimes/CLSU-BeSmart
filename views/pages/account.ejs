@@ -1,7 +1,7 @@
 <% if(!user){ %>
-        <script>window.location.href = "/";</script>
+        <!-- <script>window.location.href = "/";</script> -->
 <% } else if(user.accessLevel != "administrator"){ %>
-    <script>window.location.href = "/";</script>
+    <!-- <script>window.location.href = "/";</script> -->
 <% }%>
 
 
@@ -22,8 +22,10 @@
                 
                 <div class="card mb-3 d-print-none">
                     <div class="card-header">
-                      <i class="fas fa-table"></i>
-                      Patron
+                        <h2 class="card-title">
+                            <i class="pe-7s-user"></i>
+                            Administrator Accounts
+                        </h2>
                     </div>
                     
                     <div class="card-body">
@@ -55,6 +57,46 @@
                         <h5 class="stats">
                             Updated at <span class="last-updated text-info"></span>
                         </h5>
+                    </div>
+                </div>
+
+
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="pe-7s-tools"></i>
+                            Account Preferences
+                        </h2>
+                    </div>
+
+                    <div class="card-body bg-warning">     
+                        
+                        <div class="container">
+
+                            <div class="row">
+                                <div class="col-md-8 col-md-offset-2">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title text-center text-info">
+                                                Set Default Section
+                                            </h4>
+                                            <form name="frmUserSettings" onsubmit="return false;">
+                                                <div class="row">
+                                                    <div class="col-sm-4 col-sm-offset-4">
+                                                        <div class="form-group">
+                                                            <select class="form-control" name="section"></select>
+                                                        </div>
+                                                    </div>                                
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        
                     </div>
                 </div>
                                 

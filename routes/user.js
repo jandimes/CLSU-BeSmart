@@ -487,7 +487,9 @@ router.post( `/register`, (req, res, next) => {
                     message: `Username is already taken`
                 } );
             } else {
-                con.query( `INSERT INTO tbl_user(username, password, email, accessLevel) VALUES (?, ?, ?, 'user')`, [user.username, user.password, user.email], (error) => {
+                var sql = `INSERT INTO tbl_user(username, password, email, accessLevel) VALUES (?, ?, ?, 'user')`,
+                    sqlParams = [user.username, user.password, user.email];
+                con.query( sql, sqlParams, (error, results) => {
                     if(error) {
                         logger.error( error );
                         return res.status(500).json( {
@@ -501,25 +503,11 @@ router.post( `/register`, (req, res, next) => {
                         } );
                     }
                     else {
-                        passport.authenticate( `local`, (error, user) => {
-                            if (error) {
-                                logger.error( error );
-                                return res.status(500).json( {
-                                    error: true,
-                                    data: [ {
-                                        param: ``,
-                                        msg: `Authentication error. Please try again later`,
-                                        value: ``
-                                    } ],
-                                    message: `Authentication error. Please try again later`
-                                } );
-                            }
+                        var sql = `INSERT INTO tbl_user_settings(userID, section) VALUES ( ?, 1 )`,
+                            sqlParams = [results.insertId];
 
-                            if ( ! user ) {
-                                return res.redirect(`/`);
-                            }
-                            
-                            req.logIn( user, (error) => {
+                        con.query( sql, sqlParams, (error, results) => {
+                            passport.authenticate( `local`, (error, user) => {
                                 if (error) {
                                     logger.error( error );
                                     return res.status(500).json( {
@@ -533,18 +521,37 @@ router.post( `/register`, (req, res, next) => {
                                     } );
                                 }
 
-                                return res.json( {
-                                    error: false,
-                                    data: {
-                                        ID: user.ID,
-                                        username: user.username,
-                                        accessLevel: user.accessLevel,
-                                        email: user.email
-                                    },
-                                    message: `Account registered successfully. Please wait for admin approval to login`
-                                } );
-                            });                 
-                        })(req, res, next);
+                                if ( ! user ) {
+                                    return res.redirect(`/`);
+                                }
+                                
+                                req.logIn( user, (error) => {
+                                    if (error) {
+                                        logger.error( error );
+                                        return res.status(500).json( {
+                                            error: true,
+                                            data: [ {
+                                                param: ``,
+                                                msg: `Authentication error. Please try again later`,
+                                                value: ``
+                                            } ],
+                                            message: `Authentication error. Please try again later`
+                                        } );
+                                    }
+
+                                    return res.json( {
+                                        error: false,
+                                        data: {
+                                            ID: user.ID,
+                                            username: user.username,
+                                            accessLevel: user.accessLevel,
+                                            email: user.email
+                                        },
+                                        message: `Account registered successfully. Please wait for admin approval to login`
+                                    } );
+                                });                 
+                            })(req, res, next);
+                        } );                        
                     }
                 } );
 
