@@ -447,7 +447,7 @@ router.post( `/register`, (req, res, next) => {
 
     let errors = req.validationErrors();
     if( errors ){
-        return res.json( {
+        return res.status(400).json( {
             error: true,
             data: errors,
             message: errors
