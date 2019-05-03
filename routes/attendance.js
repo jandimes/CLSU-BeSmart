@@ -51,7 +51,7 @@ router.get( `/daily`, ( req, res ) => {
     async.parallel(
         [
             (callback) => {
-                con.query( `SELECT tbl_patrons_basic.*, tbl_attendance.date, tbl_attendance.timeIn, tbl_attendance.timeOut, tbl_attendance.section FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode WHERE tbl_attendance.date=? ORDER BY timeIn DESC, timeOut DESC`, [ getDateNow() ], (error, results) => {
+                con.query( `SELECT CAST( MAX(date) AS CHAR ) as lastUpdated FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode`, (error, results) => {
                     callback(error, results);
                 } );
             }
