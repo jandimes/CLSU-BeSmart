@@ -8,7 +8,7 @@ const router = express.Router();
 
 
 // Routes
-router.get( "/", function( req, res ) {
+router.get( `/`, function( req, res ) {
     var con = req.con;
     var logger = req.logger;
   
@@ -16,7 +16,7 @@ router.get( "/", function( req, res ) {
         [
             (callback) => {
                 try {
-                    con.query( "SELECT * FROM tbl_patrons_basic INNER JOIN tbl_patrons_library ON tbl_patrons_basic.ID=tbl_patrons_library.ID LIMIT 100", (error, results) => {
+                    con.query( `SELECT * FROM tbl_patrons_basic INNER JOIN tbl_patrons_library ON tbl_patrons_basic.ID=tbl_patrons_library.ID LIMIT 100`, (error, results) => {
                         callback(error, results);  
                     } );
                 } catch (error) {
@@ -39,12 +39,16 @@ router.get( "/", function( req, res ) {
                 } );
             }
 
-            return res.json( results[0] );
-        }
+            return res.json( {
+                error: false,
+                count: results[0].length,
+                data: results[0],
+                message: `${results[0].length} record(s) found`
+            } );}
     );
 } );
 
-router.get( '/getNotified', function( req, res ) {
+router.get( `/getNotified`, function( req, res ) {
     var con = req.con;
     var logger = req.logger;
   
@@ -52,7 +56,7 @@ router.get( '/getNotified', function( req, res ) {
         [
             (callback) => {
                 try {
-                    con.query( "SELECT * FROM tbl_patrons_library where isNotified=0", (error, results) => {
+                    con.query( `SELECT * FROM tbl_patrons_library where isNotified=0`, (error, results) => {
                         callback(error, results);  
                     } );
                 } catch (error) {
@@ -74,46 +78,58 @@ router.get( '/getNotified', function( req, res ) {
                     message: error
                 } );
             }
-            return res.json( results[0] );
+            return res.json( {
+                error: false,
+                count: results[0].length,
+                data: results[0],
+                message: `${results[0].length} record(s) found`
+            } );
         }
     );
 } );
 
-router.post( '/sendMessage', function( req, res) {
-    var url = 'https://www.itexmo.com/php_api/api.php'
-    var cellphoneNumber = req.body.cellphoneNumber
-    var message = req.body.message
-    var apiCode = req.body.apiCode
+router.post( `/sendMessage`, function( req, res) {
+    var cellphoneNumber = req.body.cellphoneNumber;
+    var message = req.body.message;
+    var apiCode = req.body.apiCode;
 
-    fetch('https://www.itexmo.com/php_api/api.php', {
-        method: 'POST',
+    fetch(`https://www.itexmo.com/php_api/api.php`, {
+        method: `POST`,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Access-Control-Allow-Origin': '*'
         },
         body: `1=${cellphoneNumber}&2=${message}&3=${apiCode}`
-    }).
-    then( response => {
-        res.send(response)
-    }).
-    then(json => console.log(json)).
-    catch( err => {
-        res.send(err)
+    })
+    .then( (response) => {
+        return res.json( {
+            error: false,
+            message: `${response}`
+        } );
+    })
+    .catch( (response) => {
+        return res.status(500).json( {
+            error: true,
+            message: `${response}`
+        } );
     })
 });
 
-router.get( '/checkOnline', function( req, res) {
-
+router.get( `/checkOnline`, function( req, res) {
     internetAvailable()
     .then(function(){
-        res.send(true)
+        return res.json({
+            error: false
+        });
     })
     .catch(function(){
-        res.send(false)
+        return res.json({
+            error: true
+        });
     });
 });
 
-router.get( '/getPatron/:id', function( req, res ) {
+router.get( `/getPatron/:id`, function( req, res ) {
     var con = req.con;
     var logger = req.logger;
     var id = req.params.id;
@@ -122,7 +138,7 @@ router.get( '/getPatron/:id', function( req, res ) {
         [
             (callback) => {
                 try {
-                    con.query( "SELECT * FROM tbl_patrons_basic where ID = ?", [id], (error, results) => {
+                    con.query( `SELECT * FROM tbl_patrons_basic where ID = ?`, [id], (error, results) => {
                         callback(error, results);  
                     } );
                 } catch (error) {
@@ -144,7 +160,12 @@ router.get( '/getPatron/:id', function( req, res ) {
                     message: error
                 } );
             }
-            return res.json( results[0] );
+            return res.json( {
+                error: false,
+                count: results[0].length,
+                data: results[0],
+                message: `${results[0].length} record(s) found`
+            } );
         }
     );
 } );
