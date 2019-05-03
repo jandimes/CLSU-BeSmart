@@ -1,7 +1,8 @@
 const express = require( "express" );
 const async = require( "async" );
 const passport = require( "passport" );
-
+const internetAvailable = require("internet-available");
+const fetch = require( "node-fetch" );
 const router = express.Router();
 
 
@@ -43,7 +44,165 @@ router.get( "/", function( req, res ) {
     );
 } );
 
+router.get( '/getNotified', function( req, res ) {
+    var con = req.con;
+    var logger = req.logger;
+  
+    async.parallel(
+        [
+            (callback) => {
+                try {
+                    con.query( "SELECT * FROM tbl_patrons_library where isNotified=0", (error, results) => {
+                        callback(error, results);  
+                    } );
+                } catch (error) {
+                    logger.error(error);
+                    return res.status(500).json( {
+                        error: true,
+                        data: error,
+                        message: error
+                    } );                   
+                }
+            }
+        ],
+        (error, results) => {
+            if(error) {
+                logger.error( error );
+                return res.status(500).json( {
+                    error: true,
+                    data: error,
+                    message: error
+                } );
+            }
+            return res.json( results[0] );
+        }
+    );
+} );
 
+router.post( '/sendMessage', function( req, res) {
+    var url = 'https://www.itexmo.com/php_api/api.php'
+    var cellphoneNumber = req.body.cellphoneNumber
+    var message = req.body.message
+    var apiCode = req.body.apiCode
+
+    fetch('https://www.itexmo.com/php_api/api.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Access-Control-Allow-Origin': '*'
+        },
+        body: `1=${cellphoneNumber}&2=${message}&3=${apiCode}`
+    }).
+    then( response => {
+        res.send(response)
+    }).
+    then(json => console.log(json)).
+    catch( err => {
+        res.send(err)
+    })
+});
+
+router.get( '/checkOnline', function( req, res) {
+
+    internetAvailable()
+    .then(function(){
+        res.send(true)
+    })
+    .catch(function(){
+        res.send(false)
+    });
+});
+
+router.get( '/getPatron/:id', function( req, res ) {
+    var con = req.con;
+    var logger = req.logger;
+    var id = req.params.id;
+  
+    async.parallel(
+        [
+            (callback) => {
+                try {
+                    con.query( "SELECT * FROM tbl_patrons_basic where ID = ?", [id], (error, results) => {
+                        callback(error, results);  
+                    } );
+                } catch (error) {
+                    logger.error(error);
+                    return res.status(500).json( {
+                        error: true,
+                        data: error,
+                        message: error
+                    } );                   
+                }
+            }
+        ],
+        (error, results) => {
+            if(error) {
+                logger.error( error );
+                return res.status(500).json( {
+                    error: true,
+                    data: error,
+                    message: error
+                } );
+            }
+            return res.json( results[0] );
+        }
+    );
+} );
+
+router.put( `/notified`, (req, res) => {
+    var con = req.con;
+    var logger = req.logger;
+    let id = req.body.id;
+
+    if( !id ) {
+        return res.status(400).json( {
+            error: true,
+            data: [ {
+                param: ``,
+                msg: `No ID provided`,
+                value: ``
+            } ]
+        } );
+    }   
+
+    async.parallel( [
+        (callback) => {
+            con.query( `UPDATE tbl_patrons_library SET isNotified = 1 WHERE ID = ?`, [id], (error, results) => {
+                callback( error, results );
+            } );
+        }
+    ],
+    (error, results) => {
+        if(error) {
+            logger.error( error );
+            return res.status(500).json( {
+                error: true,
+                data: [ {
+                    param: ``,
+                    msg: `Database error. Please try again later`,
+                    value: ``
+                } ],
+                message: `Database error. Please try again later`
+            } );
+        }
+
+        if( results[0].affectedRows === 0 ) {
+            return res.status(404).json( {
+                error: true,
+                data: [ {
+                    params: ``, msg: `No user found`, value: ``
+                } ],
+                message: `No user found`
+            } );
+        } else {
+            return res.status(200).json( {
+                error: false,
+                data: results[0],
+                message: `Updated successfully`
+            } );
+        }
+    } );
+});
 
 router.get( "/:barcode", function( req, res ) {
     var con = req.con;

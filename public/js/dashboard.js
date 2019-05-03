@@ -5,6 +5,7 @@ Chart.defaults.global.defaultFontColor = `#292b2c`;
 
 
 function onload() {
+  checkInternetConnection();
   setSectionSelection();
   showProgessBar();
 
@@ -54,6 +55,116 @@ function onload() {
             notify( responseObj.data, `danger` );
       } );
   };
+
+  const checkInternetConnection = () => {
+    var settings = {
+      "async": true,
+      "crossDomain": true,
+      "url": "/patrons/checkOnline",
+      "method": "GET"
+    }
+    
+    $.ajax(settings).done(function (response) {
+      if (response) {
+        notifyPatron();
+      } else {
+        setTimeout(function(){ 
+            $.notify( {
+            message: `No internet connection. Can't send messages!`
+        }, {
+            type: 'danger',
+            timer: 4000
+        } ); }, 5000);
+      }
+    });
+  }
+
+  const notifyPatron = () => {
+    var settings = {
+      "async": true,
+      "crossDomain": true,
+      "url": "/patrons/getNotified",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "cache-control": "no-cache",
+        "Postman-Token": "c9cc1f12-2226-4933-8582-c8edbaec34e4"
+      }
+    }
+    
+    $.ajax(settings).done(function (response) {
+        response.forEach(element => {
+          if(element.dateDue) {
+            var dateDue = new Date(element.dateDue)
+            var toNotify = new Date(dateDue)
+            toNotify.setDate(dateDue.getDate() - 1)
+            if(toNotify.getMonth() + 1 > 9){
+              var month=toNotify.getMonth() + 1
+            } else {
+              var month=`0${toNotify.getMonth() + 1}`
+            }
+
+            var dateNow = new Date();
+            if(dateNow.getMonth() + 1 > 9){
+              var monthNow = dateNow.getMonth() + 1
+            } else {
+              var monthNow = `0${dateNow.getMonth() + 1}`
+            }
+
+            var diff = `${toNotify.getFullYear()}-${month}-${toNotify.getDate()}`
+            dateNow = `${dateNow.getFullYear()}-${monthNow}-${dateNow.getDate()}`
+            if(dateNow == diff) {
+              var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "/patrons/notified",
+                "method": "PUT",
+                "headers": {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                  "cache-control": "no-cache",
+                  "Postman-Token": "d841c220-b9bc-49ba-9358-8a579db6482a"
+                },
+                "data": {
+                  "id": element.ID
+                }
+              }
+              $.ajax(settings).done(function (response) {
+                var settings = {
+                  "async": true,
+                  "crossDomain": true,
+                  "url": `/patrons/getPatron/${element.ID}`,
+                  "method": "GET",
+                  "headers": {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "cache-control": "no-cache",
+                    "Postman-Token": "f57ca6f2-9e99-4da2-81d8-c44cbaf39d2a"
+                  }
+                }
+                
+                $.ajax(settings).done(function (response) {
+                  var settings = {
+                    "async": true,
+                    "crossDomain": true,
+                    "url": "/patrons/sendMessage",
+                    "method": "POST",
+                    "headers": {
+                      "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    "data": {
+                      "cellphoneNumber": response[0].cellphoneNumber,
+                      "message": "Hi, This is to inform you that you have to return the book you borrow tomorrow\n\nThanks, CLSU Library",
+                      "apiCode": "TR-DUMMY607233_H4Y6B"
+                    }
+                  }
+                  
+                  $.ajax(settings).done();
+                });
+              });
+            }
+          }
+        });
+    });
+  }
 
 
 
