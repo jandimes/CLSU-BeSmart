@@ -195,7 +195,7 @@ const setChartReadingTimeCourse = () => {
           data: {
             labels: labels,
             datasets: [{
-              label: `Count`,
+              label: `Minutes`,
               data: data,
               backgroundColor: `#69D2E7`
             }],

@@ -13,8 +13,8 @@ router.get( `/last-updated`, ( req, res ) => {
     async.parallel(
         [
             (callback) => {
-                con.query( `SELECT MAX(date) as lastUpdated FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode`, (error, results) => {     
-                    results[0].lastUpdated = results[0].lastUpdated.toLocaleString().split(` `)[0];
+                con.query( `SELECT CAST( MAX(date) AS CHAR ) as lastUpdated FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode`, (error, results) => {     
+                    // results[0].lastUpdated = results[0].lastUpdated.toLocaleString().split(` `)[0];
                     callback(error, results);
                 } );
             }
@@ -51,7 +51,25 @@ router.get( `/daily`, ( req, res ) => {
     async.parallel(
         [
             (callback) => {
-                con.query( `SELECT tbl_patrons_basic.*, tbl_attendance.date, tbl_attendance.timeIn, tbl_attendance.timeOut, tbl_attendance.section FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode WHERE tbl_attendance.date=? ORDER BY timeIn DESC, timeOut DESC`, [ getDateNow() ], (error, results) => {
+                var sql = `
+                    SELECT
+                        tbl_patrons_basic.*,
+                        tbl_attendance.date,
+                        tbl_attendance.timeIn,
+                        tbl_attendance.timeOut,
+                        tbl_attendance.section
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        tbl_attendance.date = ?
+                    ORDER BY
+                        section ASC,
+                        timeIn DESC,
+                        timeOut DESC`,
+                    sqlParams = [ getDateNow() ];
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);
                 } );
             }
@@ -88,7 +106,21 @@ router.get( `/count-per-gender`, ( req, res ) => {
     async.parallel(
         [
             (callback) => {
-                con.query( `SELECT gender, COUNT(*) as totalAttendance FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode GROUP BY tbl_patrons_basic.gender ASC`, (error, results) => {
+                var sql = `
+                    SELECT
+                        tbl_patrons_basic.gender,
+                        COUNT(*) as totalAttendance
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != ""
+                    GROUP BY
+                        tbl_patrons_basic.gender ASC`,
+                    sqlParams = [];
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -125,7 +157,21 @@ router.get( `/count-per-course`, ( req, res ) => {
     async.parallel(
         [
             (callback) => {
-                con.query( `SELECT course, COUNT(*) as totalAttendance FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode GROUP BY tbl_patrons_basic.course ASC`, (error, results) => {
+                var sql = `
+                    SELECT
+                        tbl_patrons_basic.course,
+                        COUNT(*) as totalAttendance
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != ""
+                    GROUP BY
+                        tbl_patrons_basic.course ASC`,
+                    sqlParams = [];
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -162,7 +208,21 @@ router.get( `/count-per-section`, ( req, res ) => {
     async.parallel(
         [
             (callback) => {
-                con.query( `SELECT section, COUNT(*) as totalAttendance FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode GROUP BY tbl_attendance.section ASC`, (error, results) => {
+                var sql = `
+                    SELECT
+                        tbl_attendance.section,
+                        COUNT(*) as totalAttendance
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != ""
+                    GROUP BY
+                        tbl_attendance.section ASC`,
+                    sqlParams = [];
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -199,7 +259,21 @@ router.get( `/count-per-year`, ( req, res ) => {
     async.parallel(
         [
             (callback) => {
-                con.query( `SELECT substr(date, 1, 4) AS year, COUNT(*) AS totalAttendance FROM tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode GROUP BY year ASC`, (error, results) => {
+                var sql = `
+                    SELECT
+                        substr(date, 1, 4) AS year,
+                        COUNT(*) AS totalAttendance
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != ""
+                    GROUP BY
+                        year ASC`,
+                    sqlParams = [];
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -227,6 +301,8 @@ router.get( `/count-per-year`, ( req, res ) => {
     );
 } );
 
+
+
 router.get( `/count-per-month`, ( req, res ) => {
     var con = req.con;
     var logger = req.logger;
@@ -253,11 +329,19 @@ router.get( `/count-per-month`, ( req, res ) => {
                         substr(date, 1, 4) AS year,
                         COUNT(*) AS totalAttendance
                     FROM
-                        tbl_attendance INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode=tbl_attendance.barcode
-                    WHERE substr(date, 1, 4)=${year}
-                    GROUP BY year, month ASC`;
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        substr(date, 1, 4)=${year} AND
+                        ( tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != "" )
+                    GROUP BY
+                        year ASC,
+                        month ASC`,
+                    sqlParams = [];
 
-                con.query( sql, (error, results) => {
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -296,7 +380,8 @@ router.post( `/`, (req, res) => {
         barcode: req.body.barcode,
         date: new Date().toLocaleDateString(),
         time: new Date().toTimeString().split(" ")[0],
-        section: req.body.section
+        section: req.body.section,
+        addedBy: req.body.addedBy
     };
 
     var currentTime = attendance.time,                    
@@ -322,7 +407,17 @@ router.post( `/`, (req, res) => {
     async.waterfall(
         [
             (callback) => {
-                con.query( `SELECT MAX(timeIn) AS lastTimeIn, MAX(timeOut) AS lastTimeOut FROM tbl_attendance WHERE barcode=? AND date=?`, [attendance.barcode, attendance.date], (error, results) => {
+                var sql = `
+                    SELECT
+                        MAX(timeIn) AS lastTimeIn,
+                        MAX(timeOut) AS lastTimeOut
+                    FROM
+                        tbl_attendance
+                    WHERE
+                        barcode = ? AND
+                        date = ?`,
+                    sqlParams = [attendance.barcode, attendance.date];
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results[0]);
                 } );
             },
@@ -338,7 +433,7 @@ router.post( `/`, (req, res) => {
                         },                    
                         lastTimeInValue = Number( lastTimeInObj.hour*60*60 ) + Number( lastTimeInObj.minute*60 ) + Number( lastTimeInObj.second );
 
-                    console.log( Number(currentTimeValue) - Number(lastTimeInValue) );
+                    // console.log( Number(currentTimeValue) - Number(lastTimeInValue) );
 
                     if( results.lastTimeOut == null ) {
                         if( ( Number(currentTimeValue) - Number(lastTimeInValue) ) > 10 ) {
@@ -359,7 +454,7 @@ router.post( `/`, (req, res) => {
                             
                             lastTimeOutValue = Number( lastTimeOutObj.hour*60*60 ) + Number( lastTimeOutObj.minute*60 ) + Number( lastTimeOutObj.second );
 
-                        console.log( Number(currentTimeValue) - Number(lastTimeOutValue) );
+                        // console.log( Number(currentTimeValue) - Number(lastTimeOutValue) );
 
                         if( ( Number(currentTimeValue) - Number(lastTimeInValue) ) > 10 ||
                             ( Number(currentTimeValue) - Number(lastTimeOutValue) ) > 10 ) {
@@ -374,12 +469,47 @@ router.post( `/`, (req, res) => {
                 }                                
             },
             (callback) => {
-                con.query( `DELETE FROM tbl_attendance WHERE barcode=? AND date!=? AND (timeIn='' OR timeOut='')`, [attendance.barcode, attendance.date], (error) => {
+                // var sql = `
+                //     DELETE FROM
+                //         tbl_attendance
+                //     WHERE
+                //         barcode = ? AND
+                //         date != ? AND
+                //         ( timeIn = '' OR timeOut = '' )`,
+                
+                // DELINQUENTS
+                var sql = `
+                    UPDATE
+                        tbl_patrons_library
+                    SET
+                        tbl_patrons_library.isDelinquent = TRUE
+                    WHERE
+                        tbl_patrons_library.ID IN (
+                            SELECT
+                                tbl_patrons_basic.ID
+                            FROM
+                                tbl_attendance
+                            INNER JOIN
+                                tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                            WHERE
+                                ( tbl_attendance.timeIn = "" OR
+                                tbl_attendance.timeOut = "" )
+                        )`,
+                    sqlParams = [attendance.barcode, attendance.date];
+                con.query( sql, sqlParams, (error) => {
                     callback(error);
                 } );
             },
             (callback) => {
-                con.query( `SELECT * FROM tbl_patrons_basic WHERE barcode=?`, [attendance.barcode], (error, results) => {
+                var sql = `
+                    SELECT
+                        *
+                    FROM
+                        tbl_patrons_basic
+                    WHERE
+                        barcode = ?`,
+                    sqlParams = [attendance.barcode];
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results[0]);
                 } );
             },
@@ -395,7 +525,20 @@ router.post( `/`, (req, res) => {
                         message: `Patron with barcode of '${attendance.barcode}' does not exist`
                     } );
                 } else {
-                    con.query( `SELECT * FROM tbl_attendance WHERE barcode=? AND section=? AND date=? AND timeOut='' ORDER BY timeIn ASC`, [attendance.barcode, attendance.section, attendance.date], (error, results) => {
+                    var sql = `
+                        SELECT
+                            *
+                        FROM
+                            tbl_attendance
+                        WHERE
+                            barcode = ? AND
+                            section = ? AND
+                            date = ? AND
+                            timeOut = ''
+                        ORDER BY
+                            timeIn ASC`,
+                        sqlParams = [attendance.barcode, attendance.section, attendance.date];
+                    con.query( sql, sqlParams, (error, results) => {
                         if( results.length != 0 )
                             callback(error, results);
                         else
@@ -405,11 +548,25 @@ router.post( `/`, (req, res) => {
             },
             (results, callback) => {
                 if( results ) {
-                    con.query( `UPDATE tbl_attendance SET timeOut=? WHERE ID=?`, [attendance.time, results[0].ID], (error, results) => {
+                    var sql = `
+                        UPDATE
+                            tbl_attendance
+                        SET
+                            timeOut = ?,
+                            addedBy = ?
+                        WHERE
+                            ID = ?`,
+                        sqlParams = [attendance.time, attendance.addedBy, results[0].ID];
+                    con.query( sql, sqlParams, (error, results) => {
                         callback(error, results);
                     } );
                 } else {
-                    con.query( `INSERT INTO tbl_attendance(barcode, date, timeIn, section) VALUES(?,?,?,?)`, [attendance.barcode, attendance.date, attendance.time, attendance.section], (error, results) => {
+                    var sql = `
+                        INSERT INTO
+                            tbl_attendance ( barcode, date, timeIn, section, addedBy )
+                        VALUES ( ?, ?, ?, ?, ? )`,
+                        sqlParams = [attendance.barcode, attendance.date, attendance.time, attendance.section, attendance.addedBy];
+                    con.query( sql, sqlParams, (error, results) => {
                         callback(error, results);
                     } );
                 }

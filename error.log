@@ -43,3 +43,6 @@
 2019-04-19T14:23:08.955Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '"barcode", "date", "timeIn", "timeOut", "section")
                             V' at line 1
 2019-04-20T11:31:21.396Z error: Unknown column 'tbl_user_settings.ID' in 'where clause'
+2019-05-08T13:29:23.795Z error: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'NULL OR
+                        tbl_attendance.timeOut NOT NULL
+                ' at line 3

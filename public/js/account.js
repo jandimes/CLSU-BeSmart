@@ -1,6 +1,7 @@
 const onload = () => {
     setSectionSelection();
     setDefaultSection();
+    setDelinquentPatrons();
 
     setLastUpdated();
   };
@@ -40,31 +41,60 @@ const setSectionSelection = () => {
 
 
 
-  // DEFAULT SECTION
-  const setDefaultSection = () => {
-    let userID = JSON.parse( localStorage.getItem(`settings`) ).userID;
+// DEFAULT SECTION
+const setDefaultSection = () => {
+let userID = JSON.parse( localStorage.getItem(`settings`) ).userID;
 
+var settings = {
+    "async": true,
+    "crossDomain": true,
+    "url": `/user-settings?userID=${userID}`,
+    "method": "GET",
+    "headers": {
+        "cache-control": "no-cache",
+        "Postman-Token": "a21b3e1d-1f8b-41c7-8095-1bf003ea25fd"
+    }
+    }
+    
+    $.ajax(settings)      
+    .done( (response) => {  
+        document.forms[`frmUserSettings`][`section`].value = response.data.section;    
+    })
+    .fail( (response) => {
+        let responseObj = response.responseJSON;
+        if( responseObj.error )
+            notify( responseObj.data, `danger` );
+    } );    
+};
+
+
+
+const setDelinquentPatrons = () => {
     var settings = {
         "async": true,
         "crossDomain": true,
-        "url": `/user-settings?userID=${userID}`,
+        "url": "/patrons/delinquents",
         "method": "GET",
         "headers": {
-          "cache-control": "no-cache",
-          "Postman-Token": "a21b3e1d-1f8b-41c7-8095-1bf003ea25fd"
+            "cache-control": "no-cache",
+            "Postman-Token": "4781b6a9-c549-4f7e-a23f-c4dbcec83ee1"
         }
-      }
-      
-      $.ajax(settings)      
-        .done( (response) => {  
-            document.forms[`frmUserSettings`][`section`].value = response.data.section;    
-        })
-        .fail( (response) => {
-            let responseObj = response.responseJSON;
-            if( responseObj.error )
-                notify( responseObj.data, `danger` );
-        } );    
-  };
+    }
+    
+    $.ajax(settings).done(function (response) {              
+        var dataTable = $('#tblDelinquents').DataTable();    
+            dataTable.clear().draw();
+        
+            $.each( response.data, ( i, patron ) => {
+                dataTable.row.add( {
+                    0: patron.barcode,
+                    1: `${patron.lastName}, ${patron.firstName} ${patron.middleName}`,
+                    2: patron.gender,
+                    3: patron.course
+                  } ).draw();
+            } );
+    });
+};
 
 
 
@@ -93,7 +123,9 @@ const getUsersData = () => {
                 dataTable.row.add( {
                     0: user.username,
                     1: user.email,
-                    2: `<span class="badge mr-2"><h4><i class="pe-7s-${(user.accessLevel != "administrator") ? "delete":"add"}-user"></i></h4></span>`+ user.accessLevel.toUpperCase(),
+                    2: `<span class="badge mr-2" style="font-size:20px;">
+                            <i class="pe-7s-${(user.accessLevel != "administrator") ? "delete":"add"}-user"></i>
+                        </span>` + user.accessLevel.toUpperCase(),
                     3: `<button type="button" id="${user.ID}"` +
                         ( (`${user.accessLevel}` != "administrator") ? ` onclick="promoteUser(${user.ID});" class="promote btn btn-info" style="margin: 0px 15px;width: 89.67px;">Promote`:` onclick="demoteUser(${user.ID});" class="demote btn btn-warning" style="margin: 0px 15px;"> Demote ` ) +
                         `</button>` +

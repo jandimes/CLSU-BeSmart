@@ -20,21 +20,27 @@ router.get( `/year`, (req, res) => {
     async.parallel(
         [
             (callback) => {
-                var sql = `SELECT
-                                tbl_attendance.*,
-                                substr(date, 6, 2) AS month,
-                                substr(date, 1, 4) AS year,
-                                tbl_patrons_basic.course,
-                                tbl_patrons_basic.gender
-                            FROM
-                                tbl_attendance
-                            INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
-                            ORDER BY
-                                tbl_attendance.date ASC,
-                                tbl_attendance.timeIn ASC,
-                                tbl_attendance.timeOut ASC`;
+                var sql = `
+                    SELECT
+                        tbl_attendance.*,
+                        substr(date, 6, 2) AS month,
+                        substr(date, 1, 4) AS year,
+                        tbl_patrons_basic.course,
+                        tbl_patrons_basic.gender
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        ( tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != "" )
+                    ORDER BY
+                        tbl_attendance.date ASC,
+                        tbl_attendance.timeIn ASC,
+                        tbl_attendance.timeOut ASC`,
+                    sqlParams = [];
 
-                con.query( sql, (error, results) => {
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -123,22 +129,28 @@ router.get( `/month`, (req, res) => {
     async.parallel(
         [
             (callback) => {
-                var sql = `SELECT
-                                tbl_attendance.*,
-                                substr(date, 6, 2) AS month,
-                                substr(date, 1, 4) AS year,
-                                tbl_patrons_basic.course,
-                                tbl_patrons_basic.gender
-                            FROM
-                                tbl_attendance
-                            INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
-                            WHERE substr(tbl_attendance.date, 1, 4)=${year}
-                            ORDER BY
-                                tbl_attendance.date ASC,
-                                tbl_attendance.timeIn ASC,
-                                tbl_attendance.timeOut ASC`;
+                var sql = `
+                    SELECT
+                        tbl_attendance.*,
+                        substr(date, 6, 2) AS month,
+                        substr(date, 1, 4) AS year,
+                        tbl_patrons_basic.course,
+                        tbl_patrons_basic.gender
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        substr(tbl_attendance.date, 1, 4) = ${year} AND
+                        ( tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != "" )
+                    ORDER BY
+                        tbl_attendance.date ASC,
+                        tbl_attendance.timeIn ASC,
+                        tbl_attendance.timeOut ASC`,
+                    sqlParams = [];
 
-                con.query( sql, (error, results) => {
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -214,17 +226,23 @@ router.get( `/course`, (req, res) => {
     async.parallel(
         [
             (callback) => {
-                var sql = `SELECT
-                                tbl_attendance.*,
-                                tbl_patrons_basic.course,
-                                tbl_patrons_basic.gender
-                            FROM
-                                tbl_attendance
-                            INNER JOIN tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
-                            ORDER BY
-                                course ASC`;
+                var sql = `
+                    SELECT
+                        tbl_attendance.*,
+                        tbl_patrons_basic.course,
+                        tbl_patrons_basic.gender
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        ( tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != "" )
+                    ORDER BY
+                        course ASC`,
+                    sqlParams = [];
 
-                con.query( sql, (error, results) => {
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -299,20 +317,26 @@ router.get( `/section`, (req, res ) => {
     async.parallel(
         [
             (callback) => {
-                var sql = `SELECT
-                                tbl_patrons_basic.barcode,
-                                tbl_attendance.date,
-                                tbl_attendance.timeIn,
-                                tbl_attendance.timeOut,
-                                tbl_attendance.section,
-                                tbl_patrons_basic.course,
-                                tbl_patrons_basic.gender
-                            FROM
-                                tbl_attendance
-                            INNER JOIN
-                                tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
-                            ORDER BY section ASC`;
-                con.query( sql, (error, results) => {
+                var sql = `
+                    SELECT
+                        tbl_patrons_basic.barcode,
+                        tbl_attendance.date,
+                        tbl_attendance.timeIn,
+                        tbl_attendance.timeOut,
+                        tbl_attendance.section,
+                        tbl_patrons_basic.course,
+                        tbl_patrons_basic.gender
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        ( tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != "" )
+                    ORDER BY
+                        section ASC`,
+                    sqlParams = [];
+                con.query( sql, sqlParams, (error, results) => {
                     callback(error, results);  
                 } );
             }
@@ -387,19 +411,24 @@ router.get( `/gender`, (req, res ) => {
     async.parallel(
         [
             (callback) => {
-                var sql = `SELECT
-                                tbl_patrons_basic.barcode,
-                                tbl_attendance.date,
-                                tbl_attendance.timeIn,
-                                tbl_attendance.timeOut,
-                                tbl_attendance.section,
-                                tbl_patrons_basic.course,
-                                tbl_patrons_basic.gender
-                            FROM
-                                tbl_attendance
-                            INNER JOIN
-                                tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
-                            ORDER BY gender ASC`;
+                var sql = `
+                    SELECT
+                        tbl_patrons_basic.barcode,
+                        tbl_attendance.date,
+                        tbl_attendance.timeIn,
+                        tbl_attendance.timeOut,
+                        tbl_attendance.section,
+                        tbl_patrons_basic.course,
+                        tbl_patrons_basic.gender
+                    FROM
+                        tbl_attendance
+                    INNER JOIN
+                        tbl_patrons_basic ON tbl_patrons_basic.barcode = tbl_attendance.barcode
+                    WHERE
+                        ( tbl_attendance.timeIn != "" AND
+                        tbl_attendance.timeOut != "" )
+                    ORDER BY
+                        gender ASC`;
                 con.query( sql, (error, results) => {
                     callback(error, results);  
                 } );
