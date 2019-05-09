@@ -4,6 +4,8 @@ const onload = () => {
     setDelinquentPatrons();
 
     setLastUpdated();
+
+    $(`[data-toggle="tooltip"]`).tooltip();
   };
   
 const setLastUpdated = () => {

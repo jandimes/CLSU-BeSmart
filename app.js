@@ -130,12 +130,14 @@ var userSettingsRouter = require( `./routes/user-settings` );
 var attendanceRouter = require( `./routes/attendance` );
 var readingTimeRouter = require( `./routes/reading-time` );
 var patronRouter = require( `./routes/patron` );
+var restoreRouter = require( `./routes/restore` );
 
 app.use( `/users`, userRouter );
 app.use( `/user-settings`, userSettingsRouter );
 app.use( `/attendance`, attendanceRouter );
 app.use( `/reading-time`, readingTimeRouter );
 app.use( `/patrons`, patronRouter );
+app.use( `/restore`, restoreRouter );
 
 var fakerRouter = require( `./routes/faker` );
 app.use( `/faker`, fakerRouter );

@@ -155,7 +155,7 @@ function onload() {
                     "data": {
                       "cellphoneNumber": response.data[0].cellphoneNumber,
                       "message": "Hi, this is to inform you that you have to return the book you borrowed tomorrow\n\nThanks, CLSU Library",
-                      "apiCode": "TR-DUMMY607233_H4Y6B"
+                      "apiCode": "TR-BABYP609206_MXC2L"
                     }
                   }
                   
@@ -951,3 +951,43 @@ const toggleTextSummary = (button, attendance) => {
   else if( buttonEl.html() == `Hide Summary` )
     buttonEl.html(`Show Summary`);
 };
+
+const importBackup = () => {
+  var today = new Date();
+  var h = today.getHours();
+  var m = today.getMinutes();
+  var s = today.getSeconds();
+
+  if (h == 17 && m == 0 && s == 0) {
+    var settings = {
+      "async": true,
+      "crossDomain": true,
+      "url": "/restore/update",
+      "method": "GET",
+      "headers": {
+        "cache-control": "no-cache",
+        "Postman-Token": "d91e34f3-127d-484d-803d-17b9c223ad1b"
+      }
+    }
+    
+    $.ajax(settings)
+      .done( (response) => {
+        if( response.error ) {
+          notify( response.data, `danger` );
+        }
+        else {          
+          notify( `Restoring...`, `info` );
+        }
+      } )
+      
+      .fail( (response) => {
+        let responseObj = response.responseJSON;
+        if( responseObj.error || responseObj.warning ) {
+          notify( responseObj.message, `danger` );
+        }
+      } );
+  } else {
+    // notify( `Not Restoring...`, `warning` );
+  }
+  var repeat = setTimeout(importBackup, 1000);
+}
