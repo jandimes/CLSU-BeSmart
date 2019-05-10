@@ -1,4 +1,6 @@
 const onload = () => {
+  authenticateModule();
+
   setLastUpdated();
 };
 

@@ -51,8 +51,6 @@ router.get( `/`, ( req, res ) => {
 
 
 
-
-
 router.get( `/logout`, (req, res) => {
   req.logout();
   res.redirect( `/` );
@@ -559,6 +557,93 @@ router.post( `/register`, (req, res, next) => {
 
         }
     );
+} );
+
+router.post( `/retype-password`, ( req, res ) => {
+
+    var con = req.con;
+    var logger = req.logger;
+
+    let id = req.body.id,
+        password = req.body.password;
+    if( ! id ) {
+        return res.status(400).json( {
+            error: true,
+            data: [ {
+                param: ``,
+                msg: `No ID provided`,
+                value: ``
+            } ]
+        } );
+    }
+    if( ! password ) {
+        return res.status(400).json( {
+            error: true,
+            data: [ {
+                param: ``,
+                msg: `No password provided`,
+                value: ``
+            } ]
+        } );
+    }
+
+    async.parallel( [
+        (callback) => {
+            var sql = `
+                SELECT
+                    password
+                FROM
+                    tbl_user
+                WHERE
+                    id = ?`,
+                sqlParams = [ id ];
+            con.query( sql, sqlParams, (error, results) => {
+                callback( error, results );
+            } );
+        }
+    ],
+    (error, results) => {
+        if(error) {
+            logger.error( error );
+            return res.status(500).json( {
+                error: true,
+                data: [ {
+                    param: ``,
+                    msg: `Database error. Please try again later`,
+                    value: ``
+                } ],
+                message: `Database error. Please try again later`
+            } );
+        }
+
+        if( results[0].length < 1 ) {
+            return res.status(404).json( {
+                error: true,
+                data: [ {
+                    params: ``, msg: `No user found`, value: ``
+                } ],
+                message: `No user found`
+            } );
+        } else {
+            if( results[0][0].password != password ) {
+                return res.status(400).json( {
+                    error: true,
+                    data: [ {
+                        params: ``,
+                        msg: `Wrong password`,
+                        value: ``
+                    } ],
+                    message: `Wrong password`
+                } );
+            }
+            return res.status(200).json( {
+                error: false,
+                data: results[0],
+                message: results[0]
+            } );
+        }
+    } );
+
 } );
 
 
