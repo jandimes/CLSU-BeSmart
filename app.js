@@ -131,6 +131,7 @@ var attendanceRouter = require( `./routes/attendance` );
 var readingTimeRouter = require( `./routes/reading-time` );
 var patronRouter = require( `./routes/patron` );
 var restoreRouter = require( `./routes/restore` );
+var reportRouter = require( `./routes/report` );
 
 app.use( `/users`, userRouter );
 app.use( `/user-settings`, userSettingsRouter );
@@ -138,6 +139,7 @@ app.use( `/attendance`, attendanceRouter );
 app.use( `/reading-time`, readingTimeRouter );
 app.use( `/patrons`, patronRouter );
 app.use( `/restore`, restoreRouter );
+app.use( `/reports`, reportRouter );
 
 var fakerRouter = require( `./routes/faker` );
 app.use( `/faker`, fakerRouter );

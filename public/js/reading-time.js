@@ -5,14 +5,15 @@ Chart.defaults.global.defaultFontColor = `#292b2c`;
 
 
 const onload = () => {
-    showProgessBar();
+  setYearSelection();
+  showProgessBar();
 
-    setLastUpdated();
-    setChartReadingTimeYear();
-    setChartReadingTimeMonth( new Date().getFullYear() );
-    setChartReadingTimeCourse();
-    setChartReadingTimeSection();
-    setChartReadingTimeGender();
+  setLastUpdated();
+  setChartReadingTimeYear();
+  setChartReadingTimeMonth( new Date().getFullYear() );
+  setChartReadingTimeCourse();
+  setChartReadingTimeSection();
+  setChartReadingTimeGender();
 };
 
 const setLastUpdated = () => {
@@ -34,6 +35,37 @@ const setLastUpdated = () => {
       let responseObj = response.responseJSON;
       if( responseObj.error )
         notify( responseObj.data, `danger` );
+    } );
+};
+
+
+
+const setYearSelection = () => {
+  var selectEl = $(`select#cbox-reading-time-month-year`);
+  var settings = {
+      "async": true,
+      "crossDomain": true,
+      "url": "/attendance/count-per-year",
+      "method": "GET",
+      "headers": {
+      "cache-control": "no-cache",
+      "Postman-Token": "f0f91413-9d15-4581-a775-37373e0ef557"
+      }
+  }
+  
+  $.ajax(settings)
+    .done( (response) => {        
+      for( var i = response.data.length - 1; i >=0; i-- ) {
+        var optionEl = document.createElement(`option`);
+          optionEl.value = (response.data[i].year);
+          optionEl.innerHTML = (response.data[i].year);
+        selectEl.append( optionEl );
+      };
+    } )
+    .fail( (response) => {
+      let responseObj = response.responseJSON;
+      if( responseObj.error )
+          notify( responseObj.data, `danger` );
     } );
 };
   
@@ -62,7 +94,7 @@ const setChartReadingTimeYear = () => {
           data.push( response.data[i].totalReadingTime );
         } );
         
-        var ctx = document.getElementById( `chart-reading-time-year` );
+        var ctx = document.getElementById( `chart-reading-time-year` ).getContext(`2d`);
         var chartReadingTimeYear = new Chart(ctx, {
           type: `line`,
           data: {
@@ -85,6 +117,26 @@ const setChartReadingTimeYear = () => {
           options: {
             legend: {
               display: false
+            },
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  display: true,
+                  align: `top`,
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  },
+                  offset: `1`
+              }
+            },
+            layout: {
+              padding: {
+                top: 30
+              }
             }
           }
         });
@@ -129,8 +181,8 @@ $.ajax(settings)
     var chartReadingTimeMonth = new Chart(ctx, {
         type: `line`,
         data: {
-        labels: labels,
-        datasets: [{
+          labels: labels,
+          datasets: [{
             label: `Minutes`,
             data: data,
             lineTension: 0.3,
@@ -143,12 +195,32 @@ $.ajax(settings)
             pointHoverBackgroundColor: `rgba(2,117,216,1)`,
             pointHitRadius: 50,
             pointBorderWidth: 2
-        }]
+          }]
         },
         options: {
-        legend: {
+          legend: {
             display: false
-        }
+          },
+          tooltips: {
+            enabled: true
+          },
+          plugins: {
+            datalabels: {
+                display: true,
+                align: `top`,
+                color: `#000`,
+                font: {
+                  size: `15`,
+                  weight: `bold`
+                },
+                offset: `1`
+            }
+          },
+          layout: {
+            padding: {
+              top: 30
+            }
+          }
         }
     });
 
@@ -189,7 +261,7 @@ const setChartReadingTimeCourse = () => {
           data.push( response.data[i].totalReadingTime );
         } );
     
-        var ctx = document.getElementById(`chart-reading-time-course`);
+        var ctx = document.getElementById(`chart-reading-time-course`).getContext(`2d`);
         var chartReadingTimeCourse = new Chart(ctx, {
           type: `radar`,
           data: {
@@ -203,6 +275,26 @@ const setChartReadingTimeCourse = () => {
           options: {
             legend: {
               display: false
+            },
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  display: true,
+                  align: `-45`,
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  },
+                  offset: `1`
+              }
+            },
+            layout: {
+              padding: {
+                top: 30
+              }
             }
           }
         });
@@ -237,21 +329,50 @@ const setChartReadingTimeSection = () => {
       .done( (response) => {
         setTextReadingTimeSummary( `section`, response.data );
 
-        var labels = SECTIONS, data = [],
-            backgroundColors = [`#6B5B95`, `#DD4132`, `#9E1030`, `#FE840E`, `#C62168`, `#E94B3C`];
+        var labels = [], data = [],
+            backgroundColors = [`#6B5B95`, `#DD4132`, `#9E1030`, `#FE840E`, `#C62168`, `#E94B3C`, `#66CCCC`];
         $.each( response.data, (i) => {
-          data.push( response.data[i].totalReadingTime );
+          data.push( response.data[i].totalReadingTime );          
+          labels.push( response.data[i].section );
         } );
         
-        var ctx = document.getElementById(`chart-reading-time-section`);
+        var ctx = document.getElementById(`chart-reading-time-section`).getContext(`2d`);
         var chartReadingTimeSection = new Chart(ctx, {
-          type: `doughnut`,
+          type: `bar`,
           data: {
             labels: labels,
-            datasets: [{
-              data: data,
-              backgroundColor: backgroundColors
-            }]
+            datasets: [
+              {
+                data: data,
+                backgroundColor: backgroundColors,
+                label: `Minutes`
+              }
+            ],
+          },
+          options: {
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  formatter: (value, ctx) => {
+                      let sum = 0;
+                      let dataArr = ctx.chart.data.datasets[0].data;
+                      dataArr.map(data => {
+                          sum += data;
+                      });
+                      let percentage = `${ (value*100 / sum).toFixed(2) }%`;
+                      return percentage;
+                  },
+                  align: `top`,
+                  offset: `30`,
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  }
+              }
+            }
           }
         });
       
@@ -291,7 +412,7 @@ const setChartReadingTimeGender = () => {
           data.push( response.data[i].totalReadingTime ); 
         } );
     
-        var ctx = document.getElementById(`chart-reading-time-gender`);
+        var ctx = document.getElementById(`chart-reading-time-gender`).getContext(`2d`);
         var chartReadingTimeGender = new Chart(ctx, {
           type: `pie`,
           data: {
@@ -300,6 +421,30 @@ const setChartReadingTimeGender = () => {
               data: data,
               backgroundColor: backgroundColors
             } ]
+          },
+          options: {
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  formatter: (value, ctx) => {
+                      let sum = 0;
+                      let dataArr = ctx.chart.data.datasets[0].data;
+                      dataArr.map(data => {
+                          sum += data;
+                      });
+                      let percentage = `${ (value*100 / sum).toFixed(2) }%`;
+                      return percentage;
+                  },
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  },
+                  offset: `1`
+              }
+            }
           }
         });
 
@@ -321,52 +466,57 @@ const setChartReadingTimeGender = () => {
 
 // TEXT SUMMARY
 const setTextReadingTimeSummary = ( readingTime, data ) => {
-    var totalEl = $(`div#text-reading-time-${readingTime} .text-summary .text-total`);
-    var averageEl = $(`div#text-reading-time-${readingTime} .text-summary .text-average`);
-    var readingTimeEl = $(`div#text-reading-time-${readingTime} .text-summary .text-reading-time`);
-    var dataEl = $(`div#text-reading-time-${readingTime} .text-data`);
+  var totalEl = $(`div#text-reading-time-${readingTime} .text-summary .text-total`);
+  var averageEl = $(`div#text-reading-time-${readingTime} .text-summary .text-average`);
+  var readingTimeEl = $(`div#text-reading-time-${readingTime} .text-summary .text-reading-time`);
+  var dataEl = $(`div#text-reading-time-${readingTime} .text-data`);
 
-    var total = data.length,
-        average = 0, sum = 0,
-        dataStr = ``;
+  var total = data.length,
+    average = 0, sum = 0,
+    dataStr = ``;
 
-    data.forEach( ( value, index ) => {
-        sum += value.totalReadingTime;
+  data.forEach( ( value, index ) => {
+    sum += value.totalReadingTime;
 
-        if( readingTime == `month` )
-            value[`${readingTime}`] = new Date( new Date().setMonth( value.month-1 ) ).toDateString().split(" ")[1];
-        else if( readingTime == `section` )
-            value[`${readingTime}`] = SECTIONS[ Number( value[`${readingTime}`] )-1 ];
-        else if( readingTime == `gender` )
-            if( value[`${readingTime}`] == `F` )
-                value[`${readingTime}`] = `Female`;
-        else if( value[`${readingTime}`] == `M` )
-            value[`${readingTime}`] = `Male`;
-        else if( value[`${readingTime}`] == `U` )
-          value[`${readingTime}`] = `Undefined`;
+    if( readingTime == `month` )
+      value[`${readingTime}`] = new Date( new Date().setMonth( value.month-1 ) ).toDateString().split(" ")[1];
+    else if( readingTime == `section` )
+      value[`${readingTime}`] = SECTIONS[ Number( value[`${readingTime}`] )-1 ];
+    else if( readingTime == `gender` )
+      if( value[`${readingTime}`] == `F` )
+          value[`${readingTime}`] = `Female`;
+      else if( value[`${readingTime}`] == `M` )
+          value[`${readingTime}`] = `Male`;
+      else if( value[`${readingTime}`] == `U` )
+        value[`${readingTime}`] = `Undefined`;
 
-        if( index == 0 )
-        dataStr += `A `;
-        else
-        dataStr += `a `;
+    if( index == 0 )
+      dataStr += `A `;
+    else
+      dataStr += `a `;
 
-        dataStr += `total of <b class="text-info">${(value.totalReadingTime/60).toFixed(2)}</b> hours has been recorded in patron reading time for <i class="text-warning">${value[`${readingTime}`]}</i>`;
+    dataStr += `total of <b class="text-info">${toTimeString(value.totalReadingTime)}</b> has been recorded in patron reading time for <i class="text-warning">${value[`${readingTime}`]}</i>`;
 
-        if( (index+1) < total ) {
-        dataStr += `; `;
-        if( (index+1) == (total-1) )
-            dataStr += `and `;
-        }
-        else
-        dataStr += `. `;
-    } );
-    sum /= 60;
-    average = (sum/total);
+    if( (index+1) < total ) {
+      dataStr += `; `;
+    if( (index+1) == (total-1) )
+      dataStr += `and `;
+    }
+    else
+      dataStr += `. `;
+  } );
 
-    totalEl.html( sum.toFixed(2) );
-    averageEl.html( average.toFixed(2) );
-    readingTimeEl.html( readingTime );
-    dataEl.html( dataStr );
+  if( total > 0 )
+    average = ( sum/total);
+
+  totalEl.html( toTimeString( sum ) );
+  averageEl.html( toTimeString( average ) );
+  readingTimeEl.html( readingTime );
+  dataEl.html( dataStr );
+};
+
+const toTimeString = ( timeInMinutes ) => {
+  return `${Math.floor(timeInMinutes / 60)} hours, ${Math.floor(timeInMinutes % 60)} minutes`;
 };
 
 
@@ -469,7 +619,7 @@ const formatPrintableTextSummary = (textSummary) => {
 
 
 // EVENT LISTENERS
-$(`select#chart-reading-time-month-year`).on( `change`, (e) => {
+$(`select#cbox-reading-time-month-year`).on( `change`, (e) => {
     setChartReadingTimeMonth( Number(e.currentTarget.value) );
 } );
 

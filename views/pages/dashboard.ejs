@@ -189,10 +189,7 @@
                                     Monthly Patron Attendance for <span class="chart-attendance-month-year"></span>
                                 </h3>
                                 
-                                <select class="form-control input-md d-print-none" name="year" id="chart-attendance-month-year">
-                                    <% for( var x=0; x<5; x++ ) { %>
-                                        <option value="<%= new Date().getFullYear() - x %>"><%= new Date().getFullYear() - x %></option>
-                                    <% } %>
+                                <select class="form-control input-md d-print-none" name="year" id="cbox-attendance-month-year">
                                 </select>
                             </div>
     

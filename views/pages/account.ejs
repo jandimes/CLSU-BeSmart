@@ -18,7 +18,594 @@
 
         <div class="content">
             
-            <div class="container-fluid">                
+            <div class="container-fluid">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="pe-7s-magic-wand"></i>
+                            Custom Report Generator
+                            <i class="pe-7s-help1 pull-right" data-toggle="tooltip" data-placement="left" title="This is where you can generate and print a custom report. "></i>
+                        </h2>
+                    </div>
+
+                    <div class="card-body bg-warning">     
+
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-12 text-center">
+                                    <h1 class="pe-7s-angle-down-circle" id="toggle-custom-report-display"></h1>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="container" style="display: none;" id="custom-report-container">
+
+                            <div class="row">
+                                <div class="col-md-8 col-md-offset-2">
+                                    
+                                    <div class="panel panel-info mt-3">
+
+                                        <div class="panel-heading">
+                                            <h2 class="panel-title">
+                                                Report Settings
+                                            </h2>
+                                        </div>
+                                        <div class="panel-body">
+
+                                            <div class="container-fluid mt-3">
+
+                                                <div class="row mb-3" style="display: none;">
+
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <h4 class="title mb-3">Main Statistic</h4>
+
+                                                            <div class="container-fluid">
+                                                                <div class="row">
+                                                                    <div class="form-group">
+                                                                        <input type="checkbox" name="mainStat" id="mainStat-attendance" value="attendance">
+                                                                        <label for="mainStat-attendance">Attendance</label>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <input type="checkbox" name="mainStat" id="mainStat-reading-time" value="reading-time">
+                                                                        <label for="mainStat-reading-time">Reading Time</label>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div class="row">
+                
+                                                                    <div class="col-sm-4">
+                                                                        <div class="form-group">
+                                                                            <label for="custom-report-statType">Compute for: </label>
+                                                                            <select class="form-control" name="" id="">
+                                                                                <option value="sum">Sum</option>    
+                                                                                <option value="average">Average</option>    
+                                                                                <!-- <option value="sum, average">Sum and Average</option>     -->
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+
+                                                <div class="row mb-3">
+
+                                                    <div class="card">
+                                                        <div class="card-body">
+
+                                                            <button class="btn btn-danger pull-right btn-remove-all-filters" data-toggle="tooltip" data-placement="bottom" title="Clear All Filters">
+                                                                <i class="pe-7s-filter"></i>
+                                                                <i class="pe-7s-close"></i>
+                                                            </button>
+
+                                                            <h4 class="title mb-5">Filters</h4>
+
+                                                            <form name="frmCustomReport" onsubmit="return false;">
+
+                                                                <div class="container-fluid">
+    
+                                                                    <!-- DATE -->
+                                                                    <div class="row mt-5">
+
+                                                                        <h5>Date</h5>
+    
+                                                                        <div class="col-sm-6">
+                                                                            <div class="form-group">
+                                                                                <label for="startDate">From: </label>
+                                                                                <input class="form-control" type="date" name="startDate" id="startDate">
+                                                                            </div>
+                                                                        </div>
+    
+                                                                        <div class="col-sm-6">
+                                                                            <div class="form-group">
+                                                                                <label for="endDate">To: </label>
+                                                                                <input class="form-control" type="date" name="endDate" id="endDate">
+                                                                            </div>
+                                                                        </div>
+    
+                                                                    </div>
+
+                                                                    <hr>
+
+
+
+                                                                    <!-- COURSE -->
+                                                                    <div class="row mt-5">
+
+                                                                        <h5>Course</h5>
+    
+                                                                        <div class="col-sm-5">
+                                                                            <div class="form-group">
+                                                                                <label for="course">Select Course: </label>
+                                                                                <select class="form-control" name="course" id="course"></select>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-sm-7">
+                                                                            <div class="container-fluid">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm-10">
+                                                                                        <ul class="list-group list-group-flush mt-5 selected-filters" id="selected-course"></ul>
+                                                                                    </div>
+                                                                                    <div class="col-sm-2">
+                                                                                        <button class="btn btn-warning btn-sm pull-right btn-remove-filters" data-toggle="tooltip" data-placement="bottom" title="Clear Course Filters" data-filter="course">
+                                                                                            <i class="pe-7s-filter"></i>
+                                                                                            <i class="pe-7s-close"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+    
+                                                                    </div>
+
+
+
+                                                                    <!-- SECTION -->
+                                                                    <div class="row mt-5">
+
+                                                                        <h5>Section</h5>
+    
+                                                                        <div class="col-sm-5">
+                                                                            <div class="form-group">
+                                                                                <label for="section">Select Section: </label>
+                                                                                <select class="form-control" name="section" id="section"></select>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-sm-7">
+                                                                            <div class="container-fluid">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm-10">
+                                                                                        <ul class="list-group list-group-flush mt-5 selected-filters" id="selected-section"></ul>
+                                                                                    </div>
+                                                                                    <div class="col-sm-2">
+                                                                                        <button class="btn btn-warning btn-sm pull-right btn-remove-filters" data-toggle="tooltip" data-placement="bottom" title="Clear Section Filters" data-filter="section">
+                                                                                            <i class="pe-7s-filter"></i>
+                                                                                            <i class="pe-7s-close"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+    
+                                                                    </div>
+
+                                                                    
+
+                                                                    <!-- GENDER -->
+                                                                    <div class="row mt-5">
+
+                                                                        <h5>Gender</h5>
+    
+                                                                        <div class="col-sm-5">
+                                                                            <div class="form-group">
+                                                                                <label for="gender">Select Gender: </label>
+                                                                                <select class="form-control" name="gender" id="gender"></select>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-sm-7">
+                                                                            <div class="container-fluid">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm-10">
+                                                                                        <ul class="list-group list-group-flush mt-5 selected-filters" id="selected-gender"></ul>
+                                                                                    </div>
+                                                                                    <div class="col-sm-2">
+                                                                                        <button class="btn btn-warning btn-sm pull-right btn-remove-filters" data-toggle="tooltip" data-placement="bottom" title="Clear Gender Filters" data-filter="gender">
+                                                                                            <i class="pe-7s-filter"></i>
+                                                                                            <i class="pe-7s-close"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+    
+                                                                    </div>
+
+
+
+                                                                    <!-- ADDED BY -->
+                                                                    <div class="row mt-5">
+
+                                                                        <h5>Staff-in-charge</h5>
+    
+                                                                        <div class="col-sm-5">
+                                                                            <div class="form-group">
+                                                                                <label for="addedBy">Select Staff-in-charge: </label>
+                                                                                <select class="form-control" name="addedBy" id="addedBy"></select>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-sm-7">
+                                                                            <div class="container-fluid">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm-10">
+                                                                                        <ul class="list-group list-group-flush mt-5 selected-filters" id="selected-addedBy"></ul>
+                                                                                    </div>
+                                                                                    <div class="col-sm-2">
+                                                                                        <button class="btn btn-warning btn-sm pull-right btn-remove-filters" data-toggle="tooltip" data-placement="bottom" title="Clear Staff-in-charge Filters" data-filter="addedBy">
+                                                                                            <i class="pe-7s-filter"></i>
+                                                                                            <i class="pe-7s-close"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+    
+                                                                    </div>
+
+                                                                    
+
+                                                                    <!-- BARCODE -->
+                                                                    <div class="row mt-5" style="display: none;">
+
+                                                                        <h5>Barcode</h5>
+    
+                                                                        <div class="col-sm-5">
+                                                                            <div class="form-group">
+                                                                                <label for="barcode">Input Barcode: </label>
+                                                                                <input class="form-control" name="barcode" id="barcode">
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-sm-7">
+                                                                            <div class="container-fluid">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm-10">
+                                                                                        <ul class="list-group list-group-flush mt-5 selected-filters" id="selected-barcode"></ul>
+                                                                                    </div>
+                                                                                    <div class="col-sm-2">
+                                                                                        <button class="btn btn-warning btn-sm pull-right btn-remove-filters" data-toggle="tooltip" data-placement="bottom" title="Clear Barcode Filters" data-filter="barcode">
+                                                                                            <i class="pe-7s-filter"></i>
+                                                                                            <i class="pe-7s-close"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+    
+                                                                    </div>
+    
+                                                                </div>
+
+                                                            </form>
+
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="row mb-3">
+                                                    <div class="col-sm-4 col-sm-offset-4">
+                                                        <button class="btn btn-info btn-block btn-fill" id="btn-generate-report">Generate Report</button>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="container" id="custom-report-result" style="display: none;">
+                            <div class="row">
+                                <div class="col-sm-12">
+
+                                    <div class="card">
+                                        <div class="card-body">
+                                            
+                                            <h4 class="title mb-3">Report Result</h4>
+
+                                            <div class="table-responsive">
+
+                                                <table class="table table-bordered" id="tblCustomReportTable" width="100%" cellspacing="0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Section</th>
+                                                            <th>Barcode</th>
+                                                            <th>Course</th>
+                                                            <th>Gender</th>
+                                                            <th>Staff-in-charge</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th>
+                                                                <i class="pe-7s-date mr-2 text-warning"></i>
+                                                                Date
+                                                            </th>
+                                                            <th>
+                                                                <i class="pe-7s-way mr-2 text-warning"></i>
+                                                                Section
+                                                            </th>
+                                                            <th>
+                                                                <i class="pe-7s-id mr-2 text-warning"></i>
+                                                                Barcode
+                                                            </th>
+                                                            <th>
+                                                                <i class="pe-7s-study mr-2 text-warning"></i>
+                                                                Course
+                                                            </th>
+                                                            <th>
+                                                                <i class="pe-7s-smile mr-2 text-warning"></i>
+                                                                Gender
+                                                            </th>
+                                                            <th>
+                                                                <i class="pe-7s-hammer mr-2 text-warning"></i>
+                                                                Staff-in-charge
+                                                            </th>
+                                                        </tr>
+                                                    </tfoot>                                
+                                                    <tbody>
+                                                    </tbody>
+                                                </table>
+                                            
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="container" id="custom-report-summary" style="display: none;">
+                            <div class="row">
+                                <div class="col-sm-12">
+    
+                                    <div class="card">
+                                        <div class="card-body">
+    
+                                            <h4 class="title mb-5">Report Summary</h4>
+    
+                                            <div class="container">
+                                                <div class="col-sm-6 col-sm-offset-3">
+    
+                                                    <!-- PER YEAR -->
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+    
+                                                            <h5 class="title mb-4">Per Year</h5>
+    
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th>Statistic</th>
+                                                                    <th>Sum</th>
+                                                                    <th>Average</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Attendance</td>
+                                                                    <td id="summary-year-sum-attendance">0</td>
+                                                                    <td id="summary-year-average-attendance">0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Reading Time</td>
+                                                                    <td id="summary-year-sum-reading-time">0</td>
+                                                                    <td id="summary-year-average-reading-time">0.00</td>
+                                                                </tr>
+                                                            </table>
+    
+                                                        </div>
+                                                    </div>
+    
+                                                    <!-- PER MONTH -->
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+    
+                                                            <h5 class="title mb-4">Per Month</h5>
+    
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th>Statistic</th>
+                                                                    <th>Sum</th>
+                                                                    <th>Average</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Attendance</td>
+                                                                    <td id="summary-month-sum-attendance">0</td>
+                                                                    <td id="summary-month-average-attendance">0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Reading Time</td>
+                                                                    <td id="summary-month-sum-reading-time">0</td>
+                                                                    <td id="summary-month-average-reading-time">0.00</td>
+                                                                </tr>
+                                                            </table>
+    
+                                                        </div>
+                                                    </div>
+    
+                                                    <!-- PER DAY -->
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+    
+                                                            <h5 class="title mb-4">Per Day</h5>
+    
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th>Statistic</th>
+                                                                    <th>Sum</th>
+                                                                    <th>Average</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Attendance</td>
+                                                                    <td id="summary-day-sum-attendance">0</td>
+                                                                    <td id="summary-day-average-attendance">0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Reading Time</td>
+                                                                    <td id="summary-day-sum-reading-time">0</td>
+                                                                    <td id="summary-day-average-reading-time">0.00</td>
+                                                                </tr>
+                                                            </table>
+    
+                                                        </div>
+                                                    </div>
+    
+                                                    <!-- PER COURSE -->
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+    
+                                                            <h5 class="title mb-4">Per Course</h5>
+    
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th>Statistic</th>
+                                                                    <th>Sum</th>
+                                                                    <th>Average</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Attendance</td>
+                                                                    <td id="summary-course-sum-attendance">0</td>
+                                                                    <td id="summary-course-average-attendance">0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Reading Time</td>
+                                                                    <td id="summary-course-sum-reading-time">0</td>
+                                                                    <td id="summary-course-average-reading-time">0.00</td>
+                                                                </tr>
+                                                            </table>
+    
+                                                        </div>
+                                                    </div>
+    
+                                                    <!-- PER SECTION -->
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+    
+                                                            <h5 class="title mb-4">Per Library Section</h5>
+    
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th>Statistic</th>
+                                                                    <th>Sum</th>
+                                                                    <th>Average</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Attendance</td>
+                                                                    <td id="summary-section-sum-attendance">0</td>
+                                                                    <td id="summary-section-average-attendance">0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Reading Time</td>
+                                                                    <td id="summary-section-sum-reading-time">0</td>
+                                                                    <td id="summary-section-average-reading-time">0.00</td>
+                                                                </tr>
+                                                            </table>
+    
+                                                        </div>
+                                                    </div>
+    
+                                                    <!-- PER GENDER -->
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+    
+                                                            <h5 class="title mb-4">Per Gender</h5>
+    
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th>Statistic</th>
+                                                                    <th>Sum</th>
+                                                                    <th>Average</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Attendance</td>
+                                                                    <td id="summary-gender-sum-attendance">0</td>
+                                                                    <td id="summary-gender-average-attendance">0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Reading Time</td>
+                                                                    <td id="summary-gender-sum-reading-time">0</td>
+                                                                    <td id="summary-gender-average-reading-time">0.00</td>
+                                                                </tr>
+                                                            </table>
+    
+                                                        </div>
+                                                    </div>
+    
+                                                    <!-- PER STAFF-IN-CHARGE -->
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+    
+                                                            <h5 class="title mb-4">Per Staff-in-charge</h5>
+    
+                                                            <table class="table">
+                                                                <tr>
+                                                                    <th>Statistic</th>
+                                                                    <th>Sum</th>
+                                                                    <th>Average</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Attendance</td>
+                                                                    <td id="summary-addedBy-sum-attendance">0</td>
+                                                                    <td id="summary-addedBy-average-attendance">0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Reading Time</td>
+                                                                    <td id="summary-addedBy-sum-reading-time">0</td>
+                                                                    <td id="summary-addedBy-average-reading-time">0.00</td>
+                                                                </tr>
+                                                            </table>
+    
+                                                        </div>
+                                                    </div>
+    
+                                                </div>
+                                            </div>
+    
+    
+                                        </div>
+                                    </div>
+    
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+
+
+
+                
+
+                </div>
+
+
                 
                 <div class="card mb-3 d-print-none">
                     <div class="card-header">
@@ -167,7 +754,7 @@
                         </div>
                         
                     </div>
-                </div>
+                </div>                
                                 
             </div>
 

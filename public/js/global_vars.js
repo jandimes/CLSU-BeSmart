@@ -4,5 +4,6 @@ const SECTIONS = [
     `Multimedia`,
     `Reference`,
     `Science & Technology`,
-    `Serials`
+    `Serials`,
+    `Reading Area`
 ];

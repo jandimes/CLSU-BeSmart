@@ -1,14 +1,20 @@
 const onload = () => {
-    authenticateModule();
+    // authenticateModule();
 
     setSectionSelection();
     setDefaultSection();
+    setReportFiltersSelection();
     setDelinquentPatrons();
 
     setLastUpdated();
 
     $(`[data-toggle="tooltip"]`).tooltip();
   };
+
+// MY FUNC
+const toTimeString = ( timeInMinutes ) => {
+    return `${Math.floor(timeInMinutes / 60)} hours, ${Math.floor(timeInMinutes % 60)} minutes`;
+};
   
 const setLastUpdated = () => {
     var settings = {
@@ -33,7 +39,7 @@ const setLastUpdated = () => {
 };
 
 const setSectionSelection = () => {
-    var selectEl = $(`select[name="section"]`);
+    var selectEl = $(`form[name="frmUserSettings"] select[name="section"]`);
     SECTIONS.forEach( ( section, i ) => {
       var optionEl = document.createElement(`option`);
         optionEl.value = (i + 1);
@@ -47,28 +53,85 @@ const setSectionSelection = () => {
 
 // DEFAULT SECTION
 const setDefaultSection = () => {
-let userID = JSON.parse( localStorage.getItem(`settings`) ).userID;
+    let userID = JSON.parse( localStorage.getItem(`settings`) ).userID;
 
-var settings = {
-    "async": true,
-    "crossDomain": true,
-    "url": `/user-settings?userID=${userID}`,
-    "method": "GET",
-    "headers": {
-        "cache-control": "no-cache",
-        "Postman-Token": "a21b3e1d-1f8b-41c7-8095-1bf003ea25fd"
-    }
-    }
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": `/user-settings?userID=${userID}`,
+        "method": "GET",
+        "headers": {
+            "cache-control": "no-cache",
+            "Postman-Token": "a21b3e1d-1f8b-41c7-8095-1bf003ea25fd"
+        }
+        }
+        
+        $.ajax(settings)      
+        .done( (response) => {  
+            document.forms[`frmUserSettings`][`section`].value = response.data.section;    
+        })
+        .fail( (response) => {
+            let responseObj = response.responseJSON;
+            if( responseObj.error )
+                notify( responseObj.data, `danger` );
+        } );    
+};
+
+
+
+// FILTERS SELECTION
+const setReportFiltersSelection = () => {
+
+    var frmCustomReport = document.forms[`frmCustomReport`],
+        courseEl = frmCustomReport[`course`],
+        sectionEl = frmCustomReport[`section`],
+        genderEl = frmCustomReport[`gender`],
+        addedByEl = frmCustomReport[`addedBy`];
+        
+
+        courseEl.innerHTML += `<option value="">All</option>`;
+        sectionEl.innerHTML += `<option value="">All</option>`;
+        genderEl.innerHTML += `<option value="">All</option>`;
+        addedByEl.innerHTML += `<option value="">All</option>`;
+
     
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": `/reports/filters`,
+        "method": "GET",
+        "headers": {
+            "cache-control": "no-cache",
+            "Postman-Token": "a21b3e1d-1f8b-41c7-8095-1bf003ea25fd"
+        }
+    };
+        
     $.ajax(settings)      
-    .done( (response) => {  
-        document.forms[`frmUserSettings`][`section`].value = response.data.section;    
-    })
-    .fail( (response) => {
-        let responseObj = response.responseJSON;
-        if( responseObj.error )
-            notify( responseObj.data, `danger` );
-    } );    
+        .done( (response) => {  
+            
+            response[`data`][`course`].forEach( value => {
+                courseEl.innerHTML += `<option value="${value}">${value}</option>`;
+            } );
+
+            response[`data`][`section`].forEach( value => {
+                sectionEl.innerHTML += `<option value="${value}::${SECTIONS[value-1]}">${SECTIONS[value-1]}</option>`;
+            } );
+
+            response[`data`][`gender`].forEach( value => {
+                genderEl.innerHTML += `<option value="${value}::${( value === "F" ) ? "Female" : ( value === "M" ) ? "Male" : "Undefined"}">${( value === "F" ) ? "Female" : ( value === "M" ) ? "Male" : "Undefined"}</option>`;
+            } );
+
+            response[`data`][`addedBy`].forEach( value => {
+                addedByEl.innerHTML += `<option value="${value.ID}::${value.username}">${value.username}</option>`;
+            } );
+
+        } )
+        .fail( (response) => {
+            let responseObj = response.responseJSON;
+            if( responseObj.error )
+                notify( responseObj.data, `danger` );
+        } );    
+
 };
 
 
@@ -281,6 +344,615 @@ $(`form[name="frmUserSettings"] select[name="section"]`).on( `change`, (e) => {
             if( responseObj.error )
                 notify( responseObj.data, `danger` );
         } );
+} );
+
+
+
+$( `form[name="frmCustomReport"] select, form[name="frmCustomReport"] input:not([type="date"])` ).on( `change`, (e) => {    
+    
+    var filter = $(e.currentTarget).attr(`name`);
+    var selectedEl = document.querySelector( `#selected-${filter}` );
+    var newValue = (e.currentTarget.value);
+
+    if( e.currentTarget.value == "" ) {
+        if( selectedEl.children.length > 0 ){
+            swal( {
+                title: "Are you sure?",
+                text: "This will remove all the other filters.",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+            function(isConfirm) {
+                if (isConfirm) {
+                    selectedEl.innerHTML = ``;
+                } else {
+                    return false;
+                }
+            } );
+        }
+    } else {
+
+        // Search if filter is existing
+        for( var i = 0; i < selectedEl.children.length; i++ ) {
+            if( newValue == $( selectedEl.children[i] ).attr(`data-filter`) )
+                return false;
+        };
+            
+        selectedEl.innerHTML += `
+            <li class="list-group-item" data-filter="${newValue}">
+                ${ ( filter == `section` || filter == `gender` || filter == `addedBy` ) ? newValue.split(`::`)[1] : newValue }
+                <button class="btn btn-danger btn-xs btn-fill pull-right">
+                    <i class="pe-7s-close"></i>
+                </button>
+            </li>
+        `;
+
+        $( `.selected-filters button` ).off( `click` ).on( `click`, (e) => {
+            e.preventDefault();
+            e.currentTarget.parentNode.parentNode.removeChild( e.currentTarget.parentNode );
+        } );
+
+    }
+
+    if( (e.currentTarget.tagName).toLowerCase() == `input` ) {
+        e.preventDefault();
+        e.currentTarget.value = null;
+    }
+} );
+
+$( `.btn-remove-filters` ).on( `click`, (e) => {
+    e.preventDefault();
+    var filter = $(e.currentTarget).attr(`data-filter`);
+    var selectedEl = document.getElementById( `selected-${filter}` ); 
+
+    if( selectedEl.children.length > 0 )
+        swal( {
+            title: "Are you sure?",
+            text: `This will remove all the ${filter} filters.`,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        },
+        function(isConfirm) {
+            if (isConfirm) {
+                selectedEl.innerHTML = null;
+            } else {
+                return false;
+            }
+        } );
+
+} );
+
+$( `.btn-remove-all-filters` ).on( `click`, (e) => {
+    swal( {
+        title: "Are you sure?",
+        text: `This will remove all the filters.`,
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonClass: "btn-danger",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        closeOnConfirm: true,
+        closeOnCancel: true
+    },
+    function(isConfirm) {
+        if (isConfirm) {
+            $( `form[name="frmCustomReport"] select, form[name="frmCustomReport"] input` ).val(null);
+            $( `.selected-filters` ).html(null);
+        } else {
+            return false;
+        }
+    } );
+} );
+
+
+
+$( `#btn-generate-report` ).on( `click`, (e) => {
+    e.preventDefault();
+
+    var frmCustomReport = document.forms[`frmCustomReport`],
+        selectedEl = {
+            course: document.getElementById( `selected-course` )
+        };
+
+    var filters = {
+        startDate: {
+            year: frmCustomReport[`startDate`].value.split(`-`)[0] || ``,
+            month: frmCustomReport[`startDate`].value.split(`-`)[1] || ``,
+            day: frmCustomReport[`startDate`].value.split(`-`)[2] || ``
+        },
+        endDate: {
+            year: frmCustomReport[`endDate`].value.split(`-`)[0] || ``,
+            month: frmCustomReport[`endDate`].value.split(`-`)[1] || ``,
+            day: frmCustomReport[`endDate`].value.split(`-`)[2] || ``
+        },
+        course: ``,
+        section: ``,
+        gender: ``,
+        addedBy: ``,
+        barcode: ``
+    };
+    
+
+
+    Object.keys(filters).forEach( (key, index)  => {
+        if( key != `startDate` && key != `endDate` ) {
+            var selectedElChildren = $( `#selected-${key}` ).children();
+            for( var i = 0; i < selectedElChildren.length; i ++ ) {
+                if( key == `course` ) {
+                    filters.course += `${$( selectedElChildren[i] ).attr(`data-filter`).split(`::`)[0]}`;
+                    if( i < (selectedElChildren.length - 1) )
+                        filters.course += `, `;
+                } else if( key == `section` ) {
+                    filters.section += `${$( selectedElChildren[i] ).attr(`data-filter`).split(`::`)[0]}`;
+                    if( i < (selectedElChildren.length - 1) )
+                        filters.section += `, `;
+                } else if( key == `gender` ) {
+                    filters.gender += `${$( selectedElChildren[i] ).attr(`data-filter`).split(`::`)[0]}`;
+                    if( i < (selectedElChildren.length - 1) )
+                        filters.gender += `, `;
+                } else if( key == `addedBy` ) {
+                    filters.addedBy += `${$( selectedElChildren[i] ).attr(`data-filter`).split(`::`)[0]}`;
+                    if( i < (selectedElChildren.length - 1) )
+                        filters.addedBy += `, `;
+                } else if( key == `barcode` ) {
+                    filters.barcode += `${$( selectedElChildren[i] ).attr(`data-filter`).split(`::`)[0]}`;
+                    if( i < (selectedElChildren.length - 1) )
+                        filters.barcode += `, `;
+                }
+            };
+        }
+    } );
+    
+
+
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "/reports/generate",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "cache-control": "no-cache",
+          "Postman-Token": "64cd409e-e322-4d2f-841e-d526c5c5c28a"
+        },
+        "data": {
+          "startDateYear": filters.startDate.year,
+          "startDateMonth": filters.startDate.month,
+          "startDateDay": filters.startDate.day,
+          "endDateYear": filters.endDate.year,
+          "endDateMonth": filters.endDate.month,
+          "endDateDay": filters.endDate.day,
+          "course": filters.course,
+          "section": filters.section,
+          "gender": filters.gender,
+          "addedBy": filters.addedBy,
+          "barcode": filters.barcode
+        }
+      };
+      
+      $.ajax(settings).done( (response) => {
+
+          var summary = {
+              year: {
+                  sum: {
+                    attendance: 0,
+                    readingTime: 0
+                  },
+                  average: {
+                    attendance: 0,
+                    readingTime: 0
+                  }
+              },
+              month: {
+                  sum: {
+                    attendance: 0,
+                    readingTime: 0
+                  },
+                  average: {
+                    attendance: 0,
+                    readingTime: 0
+                  }
+              },
+              day: {
+                  sum: {
+                    attendance: 0,
+                    readingTime: 0
+                  },
+                  average: {
+                    attendance: 0,
+                    readingTime: 0
+                  }
+              },
+              course: {
+                  sum: {
+                    attendance: 0,
+                    readingTime: 0
+                  },
+                  average: {
+                    attendance: 0,
+                    readingTime: 0
+                  }
+              },
+              section: {
+                  sum: {
+                    attendance: 0,
+                    readingTime: 0
+                  },
+                  average: {
+                    attendance: 0,
+                    readingTime: 0
+                  }
+              },
+              gender: {
+                  sum: {
+                    attendance: 0,
+                    readingTime: 0
+                  },
+                  average: {
+                    attendance: 0,
+                    readingTime: 0
+                  }
+              },
+              addedBy: {
+                  sum: {
+                    attendance: 0,
+                    readingTime: 0
+                  },
+                  average: {
+                    attendance: 0,
+                    readingTime: 0
+                  }
+              }
+          };
+          
+          var years = [],
+            months = [],
+            days = [],
+            courses = [],
+            sections = [],
+            genders = [],
+            addedBys = [];
+
+          var dataTable = $('#tblCustomReportTable').DataTable();    
+            dataTable.clear().draw();
+        
+            $.each( response.data, ( i, result ) => {
+                dataTable.row.add( {
+                    0: `${result.year}/${result.month}/${result.day}`,
+                    1: SECTIONS[ (result.section-1) ],
+                    2: result.barcode,
+                    3: result.course,
+                    4: ( result.gender == `F` ) ? `Female` : ( result.gender == `M` ) ? `Male` : `Undefined`,
+                    5: result.addedByUsername
+                  } ).draw();
+            } );
+
+
+
+            // SUMMARY
+            
+                // GROUP
+                $.each( response.data, ( i, result ) => {
+                    var isYearIncluded = false;
+                    $.each( years, (i, yearObj) => {
+                        if( yearObj.year == result.year ) {
+                            isYearIncluded = true;
+                        }
+                    } );
+
+                    if( ! isYearIncluded ) {
+                        years.push( {
+                            year: result.year,
+                            sum: {
+                                attendance: 1,
+                                readingTime: result.readingTime
+                            }
+                        } );
+                    } else {
+                        $.each( years, (i, yearObj) => {
+                            if( yearObj.year == result.year ) {
+                                years[i].sum.attendance++;
+                                years[i].sum.readingTime += result.readingTime;
+                            }
+                        } );
+                    }
+                } );
+
+
+                $.each( response.data, ( i, result ) => {
+                    var isMonthIncluded = false;
+                    $.each( months, (i, monthObj) => {
+                        if( monthObj.month == `${result.year}-${result.month}` ) {
+                            isMonthIncluded = true;
+                        }
+                    } );
+
+                    if( ! isMonthIncluded ) {
+                        months.push( {
+                            month: `${result.year}-${result.month}`,
+                            sum: {
+                                attendance: 1,
+                                readingTime: result.readingTime
+                            }
+                        } );
+                    } else {
+                        $.each( months, (i, monthObj) => {
+                            if( monthObj.month == `${result.year}-${result.month}` ) {
+                                months[i].sum.attendance++;
+                                months[i].sum.readingTime += result.readingTime;
+                            }
+                        } );
+                    }
+                } );
+
+
+                $.each( response.data, ( i, result ) => {
+                    var isDayIncluded = false;
+                    $.each( days, (i, dayObj) => {
+                        if( dayObj.day == `${result.year}-${result.month}-${result.day}` ) {
+                            isDayIncluded = true;
+                        }
+                    } );
+
+                    if( ! isDayIncluded ) {
+                        days.push( {
+                            day: `${result.year}-${result.month}-${result.day}`,
+                            sum: {
+                                attendance: 1,
+                                readingTime: result.readingTime
+                            }
+                        } );
+                    } else {
+                        $.each( days, (i, dayObj) => {
+                            if( dayObj.day == `${result.year}-${result.month}-${result.day}` ) {
+                                days[i].sum.attendance++;
+                                days[i].sum.readingTime += result.readingTime;
+                            }
+                        } );
+                    }
+                } );
+
+
+                $.each( response.data, ( i, result ) => {
+                    var isCourseIncluded = false;
+                    $.each( courses, (i, courseObj) => {
+                        if( courseObj.course == result.course ) {
+                            isCourseIncluded = true;
+                        }
+                    } );
+
+                    if( ! isCourseIncluded ) {
+                        courses.push( {
+                            course: result.course,
+                            sum: {
+                                attendance: 1,
+                                readingTime: result.readingTime
+                            }
+                        } );
+                    } else {
+                        $.each( courses, (i, courseObj) => {
+                            if( courseObj.course == result.course ) {
+                                courses[i].sum.attendance++;
+                                courses[i].sum.readingTime += result.readingTime;
+                            }
+                        } );
+                    }
+                } );
+
+
+                $.each( response.data, ( i, result ) => {
+                    var isSectionIncluded = false;
+                    $.each( sections, (i, sectionObj) => {
+                        if( sectionObj.section == result.section ) {
+                            isSectionIncluded = true;
+                        }
+                    } );
+
+                    if( ! isSectionIncluded ) {
+                        sections.push( {
+                            section: result.section,
+                            sum: {
+                                attendance: 1,
+                                readingTime: result.readingTime
+                            }
+                        } );
+                    } else {
+                        $.each( sections, (i, sectionObj) => {
+                            if( sectionObj.section == result.section ) {
+                                sections[i].sum.attendance++;
+                                sections[i].sum.readingTime += result.readingTime;
+                            }
+                        } );
+                    }
+                } );
+
+
+                $.each( response.data, ( i, result ) => {
+                    var isGenderIncluded = false;
+                    $.each( genders, (i, genderObj) => {
+                        if( genderObj.gender == result.gender ) {
+                            isGenderIncluded = true;
+                        }
+                    } );
+
+                    if( ! isGenderIncluded ) {
+                        genders.push( {
+                            gender: result.gender,
+                            sum: {
+                                attendance: 1,
+                                readingTime: result.readingTime
+                            }
+                        } );
+                    } else {
+                        $.each( genders, (i, genderObj) => {
+                            if( genderObj.gender == result.gender ) {
+                                genders[i].sum.attendance++;
+                                genders[i].sum.readingTime += result.readingTime;
+                            }
+                        } );
+                    }
+                } );
+
+
+                $.each( response.data, ( i, result ) => {
+                    var isAddedByIncluded = false;
+                    $.each( addedBys, (i, addedByObj) => {
+                        if( addedByObj.addedBy == result.addedBy ) {
+                            isAddedByIncluded = true;
+                        }
+                    } );
+
+                    if( ! isAddedByIncluded ) {
+                        addedBys.push( {
+                            addedBy: result.addedBy,
+                            sum: {
+                                attendance: 1,
+                                readingTime: result.readingTime
+                            }
+                        } );
+                    } else {
+                        $.each( addedBys, (i, addedByObj) => {
+                            if( addedByObj.addedBy == result.addedBy ) {
+                                addedBys[i].sum.attendance++;
+                                addedBys[i].sum.readingTime += result.readingTime;
+                            }
+                        } );
+                    }
+                } );
+                
+
+                
+                // SUMMARIZE
+                $.each( years, (i, yearObj) => {
+                    summary.year.sum.attendance += yearObj.sum.attendance;
+                    summary.year.sum.readingTime += yearObj.sum.readingTime;
+                } );
+                summary.year.average.attendance = summary.year.sum.attendance / years.length;
+                summary.year.average.readingTime = summary.year.sum.readingTime / years.length;
+
+
+                $.each( months, (i, monthObj) => {
+                    summary.month.sum.attendance += monthObj.sum.attendance;
+                    summary.month.sum.readingTime += monthObj.sum.readingTime;
+                } );
+                summary.month.average.attendance = summary.month.sum.attendance / months.length;
+                summary.month.average.readingTime = summary.month.sum.readingTime / months.length;
+
+
+                $.each( days, (i, dayObj) => {
+                    summary.day.sum.attendance += dayObj.sum.attendance;
+                    summary.day.sum.readingTime += dayObj.sum.readingTime;
+                } );
+                summary.day.average.attendance = summary.day.sum.attendance / days.length;
+                summary.day.average.readingTime = summary.day.sum.readingTime / days.length;
+
+
+                $.each( courses, (i, courseObj) => {
+                    summary.course.sum.attendance += courseObj.sum.attendance;
+                    summary.course.sum.readingTime += courseObj.sum.readingTime;
+                } );
+                summary.course.average.attendance = summary.course.sum.attendance / courses.length;
+                summary.course.average.readingTime = summary.course.sum.readingTime / courses.length;
+
+
+                $.each( sections, (i, sectionObj) => {
+                    summary.section.sum.attendance += sectionObj.sum.attendance;
+                    summary.section.sum.readingTime += sectionObj.sum.readingTime;
+                } );
+                summary.section.average.attendance = summary.section.sum.attendance / sections.length;
+                summary.section.average.readingTime = summary.section.sum.readingTime / sections.length;
+
+
+                $.each( genders, (i, genderObj) => {
+                    summary.gender.sum.attendance += genderObj.sum.attendance;
+                    summary.gender.sum.readingTime += genderObj.sum.readingTime;
+                } );
+                summary.gender.average.attendance = summary.gender.sum.attendance / genders.length;
+                summary.gender.average.readingTime = summary.gender.sum.readingTime / genders.length;
+
+
+                $.each( addedBys, (i, addedByObj) => {
+                    summary.addedBy.sum.attendance += addedByObj.sum.attendance;
+                    summary.addedBy.sum.readingTime += addedByObj.sum.readingTime;
+                } );
+                summary.addedBy.average.attendance = summary.addedBy.sum.attendance / addedBys.length;
+                summary.addedBy.average.readingTime = summary.addedBy.sum.readingTime / addedBys.length;
+
+
+
+                // DISPLAY
+                $( `#summary-year-sum-attendance` ).html( summary.year.sum.attendance );
+                $( `#summary-year-sum-reading-time` ).html( toTimeString( summary.year.sum.readingTime ) );
+                $( `#summary-year-average-attendance` ).html( summary.year.average.attendance.toFixed(4) );
+                $( `#summary-year-average-reading-time` ).html( toTimeString( summary.year.average.readingTime ) );
+
+
+                $( `#summary-month-sum-attendance` ).html( summary.month.sum.attendance );
+                $( `#summary-month-sum-reading-time` ).html( toTimeString( summary.month.sum.readingTime ) );
+                $( `#summary-month-average-attendance` ).html( summary.month.average.attendance.toFixed(4) );
+                $( `#summary-month-average-reading-time` ).html( toTimeString( summary.month.average.readingTime ) );
+
+
+                $( `#summary-day-sum-attendance` ).html( summary.day.sum.attendance );
+                $( `#summary-day-sum-reading-time` ).html( toTimeString( summary.day.sum.readingTime ) );
+                $( `#summary-day-average-attendance` ).html( summary.day.average.attendance.toFixed(4) );
+                $( `#summary-day-average-reading-time` ).html( toTimeString( summary.day.average.readingTime ) );
+
+
+                $( `#summary-course-sum-attendance` ).html( summary.course.sum.attendance );
+                $( `#summary-course-sum-reading-time` ).html( toTimeString( summary.course.sum.readingTime ) );
+                $( `#summary-course-average-attendance` ).html( summary.course.average.attendance.toFixed(4) );
+                $( `#summary-course-average-reading-time` ).html( toTimeString( summary.course.average.readingTime ) );
+
+
+                $( `#summary-section-sum-attendance` ).html( summary.section.sum.attendance );
+                $( `#summary-section-sum-reading-time` ).html( toTimeString( summary.section.sum.readingTime ) );
+                $( `#summary-section-average-attendance` ).html( summary.section.average.attendance.toFixed(4) );
+                $( `#summary-section-average-reading-time` ).html( toTimeString( summary.section.average.readingTime ) );
+
+
+                $( `#summary-gender-sum-attendance` ).html( summary.gender.sum.attendance );
+                $( `#summary-gender-sum-reading-time` ).html( toTimeString( summary.gender.sum.readingTime ) );
+                $( `#summary-gender-average-attendance` ).html( summary.gender.average.attendance.toFixed(4) );
+                $( `#summary-gender-average-reading-time` ).html( toTimeString( summary.gender.average.readingTime ) );
+
+
+                $( `#summary-addedBy-sum-attendance` ).html( summary.addedBy.sum.attendance );
+                $( `#summary-addedBy-sum-reading-time` ).html( toTimeString( summary.addedBy.sum.readingTime ) );
+                $( `#summary-addedBy-average-attendance` ).html( summary.addedBy.average.attendance.toFixed(4) );
+                $( `#summary-addedBy-average-reading-time` ).html( toTimeString( summary.addedBy.average.readingTime ) );
+
+      } );
+
+} );
+
+$( `#toggle-custom-report-display` ).on( `click`, (e) => {
+    var customReportContainer = $( `#custom-report-container` );
+    var customReportResult = $( `#custom-report-result` );
+    var customReportSummary = $( `#custom-report-summary` );
+
+    // CHANGE ICON
+        if( customReportContainer.css( `display` ) == `block` ) {
+            e.currentTarget.className = `pe-7s-angle-down-circle`;
+        } else if( customReportContainer.css( `display` ) == `none` ) {
+            e.currentTarget.className = `pe-7s-angle-up-circle`;
+        }
+    
+    // TOGGLE DISPLAY
+        customReportContainer.toggle( `slow` );
+        customReportResult.toggle( `slow` );
+        customReportSummary.toggle( `slow` );
+
 } );
 
 

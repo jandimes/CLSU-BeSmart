@@ -7,6 +7,7 @@ Chart.defaults.global.defaultFontColor = `#292b2c`;
 function onload() {
   checkInternetConnection();
   setSectionSelection();
+  setYearSelection();
   showProgessBar();
 
   if( ! localStorage.getItem(`settings`) ) {
@@ -197,6 +198,35 @@ function onload() {
     } );
   }
 
+  const setYearSelection = () => {
+    var selectEl = $(`select#cbox-attendance-month-year`);
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "/attendance/count-per-year",
+        "method": "GET",
+        "headers": {
+        "cache-control": "no-cache",
+        "Postman-Token": "f0f91413-9d15-4581-a775-37373e0ef557"
+        }
+    }
+    
+    $.ajax(settings)
+      .done( (response) => {        
+        for( var i = response.data.length - 1; i >=0; i-- ) {
+          var optionEl = document.createElement(`option`);
+            optionEl.value = (response.data[i].year);
+            optionEl.innerHTML = (response.data[i].year);
+          selectEl.append( optionEl );
+        };
+      } )
+      .fail( (response) => {
+        let responseObj = response.responseJSON;
+        if( responseObj.error )
+            notify( responseObj.data, `danger` );
+      } );
+  };
+
 
 
   // DEFAULT SECTION
@@ -335,7 +365,9 @@ function onload() {
       else
         dataStr += `. `;
     } );
-    average = sum/total;
+
+    if( total > 0 )
+      average = sum/total;
 
     totalEl.html( sum );
     averageEl.html( average.toFixed(2) );
@@ -368,7 +400,7 @@ function onload() {
           data.push( response.data[i].totalAttendance );
         } );
         
-        var ctx = document.getElementById( `chart-attendance-year` );
+        var ctx = document.getElementById( `chart-attendance-year` ).getContext(`2d`);
         var chartAttendanceYear = new Chart(ctx, {
           type: `line`,
           data: {
@@ -391,6 +423,26 @@ function onload() {
           options: {
             legend: {
               display: false
+            },
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  display: true,
+                  align: `top`,
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  },
+                  offset: `1`
+              }
+            },
+            layout: {
+              padding: {
+                top: 30
+              }
             }
           }
         });
@@ -454,6 +506,26 @@ function onload() {
           options: {
             legend: {
               display: false
+            },
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  display: true,
+                  align: `top`,
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  },
+                  offset: `1`
+              }
+            },
+            layout: {
+              padding: {
+                top: 30
+              }
             }
           }
         });
@@ -495,20 +567,40 @@ function onload() {
           data.push( response.data[i].totalAttendance );
         } );
     
-        var ctx = document.getElementById(`chart-attendance-course`);
+        var ctx = document.getElementById(`chart-attendance-course`).getContext(`2d`);
         var chartAttendanceCourse = new Chart(ctx, {
           type: `radar`,
           data: {
             labels: labels,
-            datasets: [{
+            datasets: [ {
               label: `Count`,
               data: data,
               backgroundColor: `#69D2E7`
-            }],
+            } ],
           },
           options: {
             legend: {
               display: false
+            },
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  display: true,
+                  align: `-45`,
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  },
+                  offset: `1`
+              }
+            },
+            layout: {
+              padding: {
+                top: 30
+              }
             }
           }
         });
@@ -543,21 +635,50 @@ function onload() {
       .done( (response) => {
         setTextAttendanceSummary( `section`, response.data );
 
-        var labels = SECTIONS, data = [],
-            backgroundColors = [`#6B5B95`, `#DD4132`, `#9E1030`, `#FE840E`, `#C62168`, `#E94B3C`];
+        var labels = [], data = [],
+            backgroundColors = [`#6B5B95`, `#DD4132`, `#9E1030`, `#FE840E`, `#C62168`, `#E94B3C`, `#66CCCC`];
         $.each( response.data, (i) => {
-          data.push( response.data[i].totalAttendance );
+          data.push( response.data[i].totalAttendance );          
+          labels.push( response.data[i].section );
         } );
         
-        var ctx = document.getElementById(`chart-attendance-section`);
+        var ctx = document.getElementById(`chart-attendance-section`).getContext(`2d`);
         var chartAttendanceSection = new Chart(ctx, {
-          type: `doughnut`,
+          type: `bar`,
           data: {
             labels: labels,
-            datasets: [{
-              data: data,
-              backgroundColor: backgroundColors
-            }]
+            datasets: [
+              {
+                data: data,
+                backgroundColor: backgroundColors,
+                label: `Count`
+              }
+            ],
+          },
+          options: {
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  formatter: (value, ctx) => {
+                      let sum = 0;
+                      let dataArr = ctx.chart.data.datasets[0].data;
+                      dataArr.map(data => {
+                          sum += data;
+                      });
+                      let percentage = `${ (value*100 / sum).toFixed(2) }%`;
+                      return percentage;
+                  },
+                  align: `top`,
+                  offset: `30`,
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  }
+              }
+            }
           }
         });
       
@@ -597,7 +718,7 @@ function onload() {
           data.push( response.data[i].totalAttendance ); 
         } );
     
-        var ctx = document.getElementById(`chart-attendance-gender`);
+        var ctx = document.getElementById(`chart-attendance-gender`).getContext(`2d`);
         var chartAttendanceGender = new Chart(ctx, {
           type: `pie`,
           data: {
@@ -606,6 +727,30 @@ function onload() {
               data: data,
               backgroundColor: backgroundColors
             } ]
+          },
+          options: {
+            tooltips: {
+              enabled: true
+            },
+            plugins: {
+              datalabels: {
+                  formatter: (value, ctx) => {
+                      let sum = 0;
+                      let dataArr = ctx.chart.data.datasets[0].data;
+                      dataArr.map(data => {
+                          sum += data;
+                      });
+                      let percentage = `${ (value*100 / sum).toFixed(2) }%`;
+                      return percentage;
+                  },
+                  color: `#000`,
+                  font: {
+                    size: `15`,
+                    weight: `bold`
+                  },
+                  offset: `1`
+              }
+            }
           }
         });
 
@@ -653,7 +798,7 @@ const resetCanvas = ( canvasID ) => {
 $(window).on( `keyup`, (e) => {
   // setFrmAttendanceFocus();
 } );
-$(`select#chart-attendance-month-year`).on( `change`, (e) => {
+$(`select#cbox-attendance-month-year`).on( `change`, (e) => {
   setChartAttendanceMonth( Number(e.currentTarget.value) );
 } );
 
