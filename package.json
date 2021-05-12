@@ -62,7 +62,7 @@
     "named-placeholders": "*",
     "negotiator": "*",
     "node-csv": "^0.1.2",
-    "nodemailer": "^4.6.8",
+    "nodemailer": "^6.4.16",
     "object-assign": "*",
     "on-finished": "*",
     "parseurl": "*",
