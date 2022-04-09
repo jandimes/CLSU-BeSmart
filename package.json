@@ -54,7 +54,7 @@
     "mime": "*",
     "mime-db": "*",
     "mime-types": "*",
-    "moment": "^2.22.2",
+    "moment": "^2.29.2",
     "morgan": "^1.9.1",
     "ms": "*",
     "mysql": "^2.16.0",
