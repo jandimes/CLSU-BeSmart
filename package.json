@@ -29,7 +29,7 @@
     "escape-html": "*",
     "esprima": "*",
     "etag": "*",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "express-messages": "^1.0.1",
     "express-sanitizer": "^1.0.4",
     "express-session": "^1.15.6",
